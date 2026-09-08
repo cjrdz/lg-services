@@ -100,6 +100,21 @@ ya incluye los colores.
 copiar↔visto, buscar↔limpiar, enviar↔enviado. No es decoración; si el ícono no
 cambia de estado, va `Icon.astro` (SVG en el build, cero JS).
 
+**GSAP — animación con JS solo cuando vale la pena.** Se usa en islas Svelte
+para animaciones que CSS no puede hacer bien: secuencias de entrada, cambios de
+layout filtrados, y revelado en scroll. No reemplaza `.aparece`, `.elevable` ni
+las view transitions; las complementa.
+
+- Entrá siempre por `src/lib/gsap.ts`: registra plugins, define easings y
+  respeta `prefers-reduced-motion`.
+- GSAP se carga con dynamic imports dentro de `onMount` (o de un efecto cliente)
+  para no romper el prerender de Cloudflare, que prohíbe I/O asíncrona en
+  el scope global.
+- Nunca importar `gsap`, `Flip` o `ScrollTrigger` directamente en el top level
+  de un componente que Astro pueda renderizar en el servidor.
+- Las duraciones y curvas usan las constantes exportadas por `src/lib/gsap.ts`,
+  que reflejan los tokens de `global.css`.
+
 **Tres cosas de configuración que NO hay que "limpiar".** Las tres se ven raras y
 las tres tienen una razón verificada detrás:
 

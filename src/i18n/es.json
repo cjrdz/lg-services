@@ -44,7 +44,13 @@
 		"seccionServiciosTexto": "Asesoría legal en las áreas que más se necesitan en El Salvador.",
 		"seccionPropiedades": "Propiedades destacadas",
 		"seccionVehiculos": "Vehículos disponibles",
-		"seccionBlog": "Últimas publicaciones"
+		"seccionBlog": "Últimas publicaciones",
+		"destacados": {
+			"titulo": "Destacados",
+			"descripcion": "Propiedades y vehículos seleccionados.",
+			"verPropiedades": "Ver todas las propiedades",
+			"verVehiculos": "Ver todos los vehículos"
+		}
 	},
 	"servicios": {
 		"titulo": "Servicios legales",

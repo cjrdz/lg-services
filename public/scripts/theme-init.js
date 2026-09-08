@@ -1,6 +1,10 @@
 // Runs before paint to avoid a flash of light theme.
 // Loaded with is:inline in the <head>, so it never goes through the bundler.
 (function () {
+	// Mark that JavaScript is running. Styles that need to hide elements
+	// before GSAP animates them in rely on this class.
+	document.documentElement.classList.add("js");
+
 	function aplicarTema() {
 		try {
 			var guardado = localStorage.getItem("theme");
@@ -27,5 +31,10 @@
 	  it there causes no flash. The listener lives on `document`, which
 	  survives the swap.
 	*/
-	document.addEventListener("astro:after-swap", aplicarTema);
+	document.addEventListener("astro:after-swap", function () {
+		// The swap replaces <html> attributes; restore the JS flag so
+		// GSAP-managed entrance styles stay active.
+		document.documentElement.classList.add("js");
+		aplicarTema();
+	});
 })();

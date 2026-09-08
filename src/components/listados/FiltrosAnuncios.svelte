@@ -1,13 +1,20 @@
 <script lang="ts">
-	import { untrack } from "svelte";
-	import { r2Srcset, r2Url } from "@/lib/media/r2";
+	import { tick, untrack } from "svelte";
 	import { MorphIcon } from "morphicons/svelte";
 	import { MORPH_REDUCED_MOTION } from "@/lib/motion";
 	import { Search, X } from "lucide";
+	import TarjetaAnuncio from "@/components/anuncios/TarjetaAnuncio.svelte";
+	import {
+		cargarGsap,
+		capturarFlipState,
+		DURACION_NORMAL,
+		prefiereMovimientoReducido,
+		type GsapModulo,
+	} from "@/lib/gsap";
 	import type {
 		DescriptorFiltro,
 		DescriptorOrden,
-		TarjetaAnuncio,
+		TarjetaAnuncio as TarjetaAnuncioTipo,
 	} from "@/lib/anuncios-tipos";
 
 	/**
@@ -25,7 +32,7 @@
 	 * indexable before any JavaScript arrives.
 	 */
 	interface Props {
-		tarjetas: TarjetaAnuncio[];
+		tarjetas: TarjetaAnuncioTipo[];
 		filtros: DescriptorFiltro[];
 		ordenes: DescriptorOrden[];
 		textos: Record<string, string>;
@@ -52,6 +59,11 @@
 	let numeros = $state<Record<string, number | null>>({});
 	let orden = $state(ordenPorDefecto);
 	let montado = $state(false);
+	let grid: HTMLElement | undefined = $state();
+	let gsapMod = $state<GsapModulo | null>(null);
+
+	// Start loading GSAP as soon as this module runs on the client.
+	const gsapPromise = typeof window !== "undefined" ? cargarGsap() : null;
 
 	/* On mount, read the URL: a filter shared over WhatsApp — how listings
 	   actually circulate here — opens to exactly what the sender saw. */
@@ -76,6 +88,11 @@
 
 		const o = p.get("orden");
 		if (o && ordenes.some((x) => x.clave === o)) orden = o;
+
+		// GSAP is already loading from the module-level promise.
+		gsapPromise?.then((g) => {
+			gsapMod = g;
+		});
 	});
 
 	const normalizada = $derived(
@@ -149,13 +166,60 @@
 		orden = ordenPorDefecto;
 	}
 
-	const dinero = new Intl.NumberFormat("es-SV", {
-		style: "currency",
-		currency: "USD",
-		maximumFractionDigits: 0,
+	/* Capture the layout BEFORE Svelte updates the DOM. */
+	let estadoFlip: ReturnType<typeof import("gsap/Flip").Flip.getState> | undefined;
+	$effect.pre(() => {
+		// Reading filtradas makes this effect run whenever the list changes.
+		const _ = filtradas.map((t) => t.slug);
+		if (grid && gsapMod && !prefiereMovimientoReducido()) {
+			estadoFlip = capturarFlipState(gsapMod.Flip, grid.querySelectorAll("article"));
+		}
 	});
 
-	const ANCHOS_TARJETA = [240, 480, 960] as const;
+	/* Animate from the captured layout AFTER Svelte updates the DOM. */
+	$effect(() => {
+		const _ = filtradas.map((t) => t.slug);
+		if (!estadoFlip || !grid || !gsapMod || prefiereMovimientoReducido()) return;
+
+		tick().then(() => {
+			const cards = grid!.querySelectorAll("article");
+			cards.forEach((el) => el.classList.add("flip-animando"));
+
+			gsapMod!.Flip.from(estadoFlip!, {
+				duration: DURACION_NORMAL,
+				ease: "salida",
+				stagger: 0.03,
+				absolute: true,
+				scale: true,
+				simple: true,
+				onEnter: (elements) =>
+					gsapMod!.gsap.fromTo(
+						elements,
+						{ opacity: 0, scale: 0.96 },
+						{
+							opacity: 1,
+							scale: 1,
+							duration: DURACION_NORMAL,
+							ease: "salida",
+						},
+					),
+				onLeave: (elements) =>
+					gsapMod!.gsap.fromTo(
+						elements,
+						{ opacity: 1, scale: 1 },
+						{
+							opacity: 0,
+							scale: 0.96,
+							duration: DURACION_NORMAL,
+							ease: "salida",
+						},
+					),
+				onComplete: () => {
+					cards.forEach((el) => el.classList.remove("flip-animando"));
+				},
+			});
+		});
+	});
 </script>
 
 <div class="grid gap-8 lg:grid-cols-[16rem_1fr]">
@@ -258,71 +322,18 @@
 				<p class="text-muted-foreground mt-1 text-sm">{textos.sinResultadosAyuda}</p>
 			</div>
 		{:else}
-			<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+			<div
+				bind:this={grid}
+				class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"
+			>
 				{#each filtradas as t (t.slug)}
-					<article
-						class="border-border bg-card hover:border-primary/40 group elevable relative overflow-hidden rounded-xl border"
-					>
-						{#if r2Url(t.foto, 480)}
-							<img
-								src={r2Url(t.foto, 480)}
-								srcset={r2Srcset(t.foto, ANCHOS_TARJETA)}
-								sizes="(min-width: 1280px) 20rem, (min-width: 640px) 45vw, 90vw"
-								alt={t.alt}
-								loading="lazy"
-								decoding="async"
-								style="aspect-ratio:4/3"
-								class="bg-muted w-full object-cover"
-							/>
-						{:else}
-							<!--
-								No <img> when there's no URL. A src="" is NOT "an empty
-								image" — the browser resolves it against the document's own
-								URL and re-requests the whole page. Happens while R2 isn't
-								configured yet.
-							-->
-							<div
-								class="bg-muted text-muted-foreground flex w-full items-center justify-center text-xs"
-								style="aspect-ratio:4/3"
-							>
-								{textos.sinFoto}
-							</div>
-						{/if}
-
-						<div class="p-4">
-							<div class="flex items-start justify-between gap-2">
-								<p class="font-semibold">
-									{t.ocultarPrecio ? textos.consultarPrecio : dinero.format(t.precio)}
-									{#if !t.ocultarPrecio && t.periodoTexto}
-										<span class="text-muted-foreground text-sm font-normal">
-											{t.periodoTexto}
-										</span>
-									{/if}
-								</p>
-								{#if t.insignia}
-									<span
-										class="bg-secondary text-secondary-foreground shrink-0 rounded px-2 py-0.5 text-xs"
-									>
-										{t.insignia}
-									</span>
-								{/if}
-							</div>
-
-							<h3 class="group-hover:text-primary mt-1 font-medium transition-colors">
-								<a href={t.href} class="after:absolute after:inset-0">{t.titulo}</a>
-							</h3>
-
-							<p class="text-muted-foreground mt-1 text-sm">{t.subtitulo}</p>
-
-							{#if t.datos.length > 0}
-								<p class="text-muted-foreground mt-2 text-xs">
-									{t.datos.join(" · ")}
-								</p>
-							{/if}
-						</div>
-					</article>
+					<TarjetaAnuncio
+						tarjeta={t}
+						textos={{ sinFoto: textos.sinFoto, consultarPrecio: textos.consultarPrecio }}
+					/>
 				{/each}
 			</div>
 		{/if}
 	</div>
 </div>
+

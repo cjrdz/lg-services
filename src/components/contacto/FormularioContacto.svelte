@@ -100,7 +100,7 @@
 				class="border-input bg-background mt-1 w-full rounded-lg border px-3 py-2 text-sm"
 			/>
 			{#if errores.nombre}
-				<span class="text-destructive mt-1 block text-xs">{errores.nombre}</span>
+				<span class="error-animado text-destructive mt-1 block text-xs">{errores.nombre}</span>
 			{/if}
 		</label>
 
@@ -115,7 +115,7 @@
 				class="border-input bg-background mt-1 w-full rounded-lg border px-3 py-2 text-sm"
 			/>
 			{#if errores.correo}
-				<span class="text-destructive mt-1 block text-xs">{errores.correo}</span>
+				<span class="error-animado text-destructive mt-1 block text-xs">{errores.correo}</span>
 			{/if}
 		</label>
 
@@ -153,7 +153,7 @@
 			class="border-input bg-background mt-1 w-full rounded-lg border px-3 py-2 text-sm"
 		></textarea>
 		{#if errores.mensaje}
-			<span class="text-destructive mt-1 block text-xs">{errores.mensaje}</span>
+			<span class="error-animado text-destructive mt-1 block text-xs">{errores.mensaje}</span>
 		{/if}
 	</label>
 
@@ -182,7 +182,7 @@
 		</span>
 	</label>
 	{#if errores.privacidad}
-		<span class="text-destructive block text-xs">{errores.privacidad}</span>
+		<span class="error-animado text-destructive block text-xs">{errores.privacidad}</span>
 	{/if}
 
 	{#if turnstileSiteKey}
@@ -210,14 +210,14 @@
 
 	{#if resultado === "ok"}
 		<p
-			class="border-success bg-success/10 text-foreground rounded-lg border px-4 py-3 text-sm"
+			class="mensaje-animado border-success bg-success/10 text-foreground rounded-lg border px-4 py-3 text-sm"
 			role="status"
 		>
 			{textos.exito}
 		</p>
 	{:else if resultado === "error"}
 		<p
-			class="border-destructive bg-destructive/10 text-foreground rounded-lg border px-4 py-3 text-sm"
+			class="mensaje-animado border-destructive bg-destructive/10 text-foreground rounded-lg border px-4 py-3 text-sm"
 			role="alert"
 		>
 			{mensajeGlobal || textos.error}

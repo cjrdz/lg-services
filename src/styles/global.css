@@ -240,6 +240,187 @@
 	.aparece-escalonado > *:nth-child(n + 4) {
 		transition-delay: 120ms;
 	}
+
+	/*
+	  Hero entrance animation.
+
+	  CSS handles the initial sequence: it starts immediately with the first
+	  paint, needs no JS, and has no flash of visible-then-hidden content that
+	  GSAP from() causes when it runs after hydration. Reduced-motion users see
+	  the content right away.
+
+	  Uses @starting-style + transition instead of keyframes so GSAP can later
+	  animate opacity/transform without fighting animation-fill-mode.
+	*/
+	.hero-animable {
+		opacity: 1;
+		translate: 0 0;
+		transition:
+			opacity 0.85s var(--curva-salida),
+			translate 0.85s var(--curva-salida);
+	}
+
+	@starting-style {
+		.hero-animable {
+			opacity: 0;
+			translate: 0 1.5rem;
+		}
+	}
+
+	.hero-animable-titulo {
+		transition-delay: 0ms;
+	}
+	.hero-animable-subtitulo {
+		transition-delay: 140ms;
+	}
+	.hero-animable-botones {
+		transition-delay: 260ms;
+	}
+
+	.hero-animable-imagen {
+		opacity: 1;
+		scale: 1;
+		transition:
+			opacity 0.9s var(--curva-salida),
+			scale 0.9s var(--curva-salida);
+		transition-delay: 90ms;
+	}
+
+	@starting-style {
+		.hero-animable-imagen {
+			opacity: 0;
+			scale: 0.96;
+		}
+	}
+
+	/*
+	  Once the CSS entrance is done, remove the transition so GSAP can scrub
+	  opacity/transform without fighting the CSS transition on every frame.
+	*/
+	.hero-animacion-lista {
+		transition: none !important;
+	}
+
+	/*
+	  Hero primary CTA: a soft backlight pulse using the brand color.
+	  CSS-only, smooth, and pauses for reduced-motion users.
+	*/
+	.cta-backlight {
+		animation: cta-pulso 2.4s ease-in-out infinite;
+	}
+
+	@keyframes cta-pulso {
+		0%,
+		100% {
+			box-shadow:
+				0 0 0 0 color-mix(in oklch, var(--primary) 35%, transparent),
+				0 4px 14px -6px color-mix(in oklch, var(--primary) 20%, transparent);
+		}
+		50% {
+			box-shadow:
+				0 0 28px -4px color-mix(in oklch, var(--primary) 55%, transparent),
+				0 6px 20px -6px color-mix(in oklch, var(--primary) 30%, transparent);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.hero-animable,
+		.hero-animable-imagen {
+			opacity: 1;
+			transform: none;
+			transition: none;
+		}
+
+		.cta-backlight {
+			animation: none;
+			box-shadow: 0 4px 14px -6px color-mix(in oklch, var(--primary) 20%, transparent);
+		}
+	}
+
+	/*
+	  Scroll-driven card reveals. Hidden before GSAP's ScrollTrigger takes
+	  over, so cards don't flash visible for a moment when entering the viewport.
+	  No-JS users keep the content visible.
+	*/
+	.scroll-animable {
+		opacity: 1;
+		transform: none;
+	}
+
+	.js .scroll-animable {
+		opacity: 0;
+		transform: translateY(1.5rem);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.js .scroll-animable {
+			opacity: 1;
+			transform: none;
+		}
+	}
+
+	/*
+	  GSAP Flip animates transforms; the .elevable transition on cards fights
+	  it. This class is added while Flip runs and removed when it finishes.
+	*/
+	.flip-animando {
+		transition: none !important;
+	}
+
+	/*
+	  Form feedback: success/error messages and inline field errors.
+	  Runs once when the element appears; reduced motion keeps it visible.
+	*/
+	.mensaje-animado {
+		opacity: 0;
+		transform: translateY(0.5rem);
+		animation: mensaje-entrar var(--duracion-normal) var(--curva-salida)
+			forwards;
+	}
+
+	.error-animado {
+		opacity: 0;
+		transform: translateX(-0.25rem);
+		animation: error-entrar var(--duracion-rapida) var(--curva-salida)
+			forwards;
+	}
+
+	@keyframes mensaje-entrar {
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@keyframes error-entrar {
+		to {
+			opacity: 1;
+			transform: translateX(0);
+		}
+	}
+
+	/*
+	  FAQ accordion. Grid-template-rows animates from 0fr to 1fr, giving a
+	  smooth height transition without measuring the content in JS.
+	  Default is open so no-JS users can read the answers; JS collapses it.
+	*/
+	.acordeon-contenido {
+		display: grid;
+		grid-template-rows: 1fr;
+		transition: grid-template-rows var(--duracion-normal) var(--curva-salida);
+	}
+
+	.js .acordeon-contenido {
+		grid-template-rows: 0fr;
+	}
+
+	.js .acordeon-contenido.abierto {
+		grid-template-rows: 1fr;
+	}
+
+	.acordeon-contenido > div {
+		overflow: hidden;
+	}
 }
 
 /*
@@ -295,5 +476,10 @@
 	:root[data-motion="sistema"] .aparece {
 		opacity: 1 !important;
 		translate: none !important;
+	}
+
+	:root[data-motion="sistema"] .js .acordeon-contenido {
+		grid-template-rows: 1fr !important;
+		transition: none !important;
 	}
 }
