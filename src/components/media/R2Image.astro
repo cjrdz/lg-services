@@ -1,0 +1,61 @@
+---
+import { r2Srcset, r2Url } from "@/lib/media/r2";
+import { ANCHOS_GALERIA } from "@/lib/media/keys";
+
+/**
+ * A listing's photo, served from R2.
+ *
+ * Emits a plain <img srcset> pointing at files that ALREADY exist — Lisbeth's
+ * browser generated the WebP files at upload time. Deliberately bypasses
+ * astro:assets: <Picture> would require declaring remotePatterns and
+ * round-tripping every photo through sharp on every build, which at a
+ * thousand photos turns the build into several minutes re-optimizing bytes
+ * that were already optimized.
+ *
+ * No width/height: unknowable without fetching the image. aspect-ratio on a
+ * container with object-cover avoids the layout shift anyway.
+ *
+ * For REPO images (portrait, office) use <ImagenLocal> instead, which does
+ * go through astro:assets.
+ */
+interface Props {
+	src: string;
+	alt: string;
+	anchos?: readonly number[];
+	sizes?: string;
+	ratio?: string;
+	loading?: "lazy" | "eager";
+	fetchpriority?: "high" | "low" | "auto";
+	class?: string;
+}
+
+const {
+	src,
+	alt,
+	anchos = ANCHOS_GALERIA,
+	sizes = "(min-width: 1024px) 50vw, 100vw",
+	ratio = "4 / 3",
+	loading = "lazy",
+	fetchpriority = "auto",
+	class: className,
+} = Astro.props;
+
+const mayor = anchos[anchos.length - 1];
+const fallback = r2Url(src, mayor);
+---
+
+{
+	fallback && (
+		<img
+			src={fallback}
+			srcset={r2Srcset(src, anchos)}
+			sizes={sizes}
+			alt={alt}
+			loading={loading}
+			decoding="async"
+			fetchpriority={fetchpriority}
+			style={`aspect-ratio:${ratio}`}
+			class:list={["bg-muted h-full w-full object-cover", className]}
+		/>
+	)
+}

@@ -1,0 +1,11 @@
+{
+	"nombre": "LG",
+	"nombreLegal": "Lisbeth Gutiérrez Jiménez",
+	"profesion": "Asesora y consultora legal",
+	"ogImagen": "/images/og-default.jpg",
+	"modulos": {
+		"propiedades": true,
+		"vehiculos": true,
+		"blog": true
+	}
+}

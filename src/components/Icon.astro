@@ -1,0 +1,63 @@
+---
+import { icons as lucide } from "@iconify-json/lucide";
+import { getIconData, iconToSVG, replaceIDs } from "@iconify/utils";
+
+/**
+ * Static icon as an inline SVG, resolved AT BUILD TIME.
+ *
+ * A hydrated icon component would give every `<Icon client:visible />` its
+ * own island — a page with seven practice areas ended up with fourteen
+ * islands just to draw pictures that never change. This ships zero JS.
+ *
+ * Icons that morph between two states (inside Svelte islands) use
+ * `morphicons/svelte` instead — see the icon table in AGENTS.md.
+ *
+ * Only resolves the `lucide:` collection, the only one the site uses. A
+ * missing icon fails the build instead of rendering an empty gap.
+ */
+interface Props {
+	name: string;
+	size?: number;
+	class?: string;
+	/** If passed, the icon is meaningful and gets announced; otherwise it's decorative. */
+	label?: string;
+}
+
+const { name, size = 20, class: className, label } = Astro.props;
+
+const [coleccion, nombreIcono] = name.includes(":")
+	? name.split(":", 2)
+	: ["lucide", name];
+
+// These throw messages are developer-facing, not Lisbeth's — they propagate
+// through a Cloudflare prerender error header that doesn't accept non-ASCII
+// and would otherwise mangle them.
+if (coleccion !== "lucide") {
+	throw new Error(
+		`<Icon name="${name}" />: only the "lucide" collection is installed. ` +
+			`Install @iconify-json/${coleccion} and register it in Icon.astro.`,
+	);
+}
+
+const datos = getIconData(lucide, nombreIcono);
+if (!datos) {
+	throw new Error(
+		`<Icon name="${name}" />: icon "${nombreIcono}" doesn't exist in lucide.`,
+	);
+}
+
+const render = iconToSVG(datos, { height: size, width: size });
+// replaceIDs avoids collisions when two icons on the same page use gradients
+// or clips with the same internal id.
+const cuerpo = replaceIDs(render.body);
+---
+
+<svg
+	{...render.attributes}
+	xmlns="http://www.w3.org/2000/svg"
+	class={className}
+	role={label ? "img" : undefined}
+	aria-label={label}
+	aria-hidden={label ? undefined : "true"}
+	set:html={cuerpo}
+/>

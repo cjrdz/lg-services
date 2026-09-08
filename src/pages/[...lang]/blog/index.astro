@@ -1,0 +1,102 @@
+---
+import { localePaths, localizedUrl } from "@/i18n/routing";
+import { useTranslations } from "@/i18n";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Icon from "@/components/Icon.astro";
+import TarjetaEntrada from "@/components/blog/TarjetaEntrada.astro";
+import { conteoPorArea, getEntradas } from "@/lib/contenido";
+import { AREAS, areasOrdenadas } from "@/lib/taxonomia";
+import { esquemaMigas, migasDe } from "@/lib/seo";
+import { SITIO } from "@/lib/sitio";
+
+export const getStaticPaths = localePaths;
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const site = Astro.site ?? new URL("https://lisbethgutierrez.com");
+
+const entradas = await getEntradas(locale);
+const recientes = entradas.slice(0, 6);
+const conteo = await conteoPorArea(locale);
+const areas = areasOrdenadas(locale);
+
+const migas = migasDe(locale, [{ nombre: t("blog.titulo") }]);
+
+const esquemaBlog = {
+	"@context": "https://schema.org",
+	"@type": "Blog",
+	name: t("blog.titulo"),
+	description: t("blog.descripcion"),
+	url: new URL(localizedUrl("/blog", locale), site).href,
+	inLanguage: "es-SV",
+	publisher: { "@id": `${new URL("/", site).href}#negocio` },
+	author: { "@type": "Person", name: SITIO.nombreLegal },
+};
+---
+
+<BaseLayout
+	locale={locale}
+	titulo={t("blog.titulo")}
+	descripcion={t("blog.descripcion")}
+	esquemas={[esquemaBlog, esquemaMigas(migas, site)]}
+>
+	<section class="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+		<h1 class="font-serif text-4xl font-bold tracking-tight">{t("blog.titulo")}</h1>
+		<p class="text-muted-foreground mt-3 max-w-2xl text-lg">
+			{t("blog.descripcion")}
+		</p>
+
+		{
+			recientes.length > 0 ? (
+				<>
+					<h2 class="mt-12 font-serif text-2xl font-bold">{t("blog.recientes")}</h2>
+					<div class="aparece aparece-escalonado mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+						{recientes.map((entrada) => (
+							<TarjetaEntrada entrada={entrada} locale={locale} />
+						))}
+					</div>
+				</>
+			) : (
+				<div class="border-border bg-muted/30 mt-12 rounded-xl border border-dashed p-10 text-center">
+					<p class="font-medium">{t("blog.vacio")}</p>
+					<p class="text-muted-foreground mt-1 text-sm">{t("blog.vacioAyuda")}</p>
+				</div>
+			)
+		}
+
+		<h2 class="mt-16 font-serif text-2xl font-bold">{t("blog.categorias")}</h2>
+		<div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+			{
+				areas.map((area) => {
+					const n = conteo[area.id] ?? 0;
+					const vacia = n === 0;
+					return (
+						<a
+							href={vacia ? undefined : localizedUrl(`/blog/${area.id}`, locale)}
+							aria-disabled={vacia ? "true" : undefined}
+							class:list={[
+								"border-border bg-card group rounded-xl border p-5 transition-colors",
+								vacia ? "pointer-events-none opacity-60" : "hover:border-primary/40",
+							]}
+						>
+							<span class="bg-secondary text-secondary-foreground mb-3 inline-flex size-10 items-center justify-center rounded-lg">
+								<Icon name={AREAS[area.id].icono} size={20} />
+							</span>
+							<h3 class="group-hover:text-primary font-semibold transition-colors">
+								{area.titulo}
+							</h3>
+							<p class="text-muted-foreground mt-1 text-sm">{area.resumen}</p>
+							<p class="text-muted-foreground mt-3 text-xs">
+								{vacia
+									? t("common.proximamente")
+									: n === 1
+										? "1 publicación"
+										: `${n} publicaciones`}
+							</p>
+						</a>
+					);
+				})
+			}
+		</div>
+	</section>
+</BaseLayout>

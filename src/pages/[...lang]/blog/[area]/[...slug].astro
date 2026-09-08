@@ -1,0 +1,122 @@
+---
+import { render } from "astro:content";
+import { localePathsFor, localizedUrl } from "@/i18n/routing";
+import { useTranslations } from "@/i18n";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { Badge } from "@/components/ui/badge";
+import { getEntradas, formatearFecha, slugDe } from "@/lib/contenido";
+import { areaTitulo } from "@/lib/taxonomia";
+import { esquemaArticulo, esquemaMigas, migasDe } from "@/lib/seo";
+
+export async function getStaticPaths() {
+	// getEntradas already filters drafts based on the environment, so in
+	// production a draft post doesn't even generate a route.
+	const entradas = await getEntradas();
+	return localePathsFor(
+		entradas.map((entrada) => {
+			// slugDe("es/derecho-laboral/demanda-laboral") -> "derecho-laboral/demanda-laboral"
+			const [area, ...resto] = slugDe(entrada.id).split("/");
+			return {
+				params: { area, slug: resto.join("/") },
+				props: { entrada },
+			};
+		}),
+	);
+}
+
+const { entrada, locale } = Astro.props;
+const t = useTranslations(locale);
+const site = Astro.site ?? new URL("https://lisbethgutierrez.com");
+
+const d = entrada.data;
+const { Content } = await render(entrada);
+
+const migas = migasDe(locale, [
+	{ nombre: t("blog.titulo"), path: "/blog" },
+	{ nombre: areaTitulo(d.area, locale), path: `/blog/${d.area}` },
+	{ nombre: d.titulo },
+]);
+---
+
+<BaseLayout
+	locale={locale}
+	titulo={d.seo.titulo ?? d.titulo}
+	descripcion={d.seo.descripcion ?? d.descripcion}
+	imagen={d.portada}
+	noindex={d.seo.noindex || d.borrador}
+	tipoOg="article"
+	esquemas={[
+		esquemaArticulo(
+			{
+				titulo: d.titulo,
+				descripcion: d.descripcion,
+				autor: d.autor,
+				publicado: d.publicado,
+				actualizado: d.actualizado,
+				imagen: d.portada,
+				area: areaTitulo(d.area, locale),
+			},
+			Astro.url.pathname,
+			site,
+		),
+		esquemaMigas(migas, site),
+	]}
+>
+	<article class="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+		<nav aria-label="Migas de pan" class="text-muted-foreground mb-6 text-sm">
+			<a href={localizedUrl("/blog", locale)} class="hover:text-foreground">
+				{t("blog.titulo")}
+			</a>
+			<span class="mx-2">/</span>
+			<a href={localizedUrl(`/blog/${d.area}`, locale)} class="hover:text-foreground">
+				{areaTitulo(d.area, locale)}
+			</a>
+		</nav>
+
+		{
+			d.borrador && (
+				<Badge variant="outline" class="mb-4">
+					Borrador
+				</Badge>
+			)
+		}
+
+		<h1 class="font-serif text-4xl font-bold tracking-tight text-balance">
+			{d.titulo}
+		</h1>
+
+		<p class="text-muted-foreground mt-4 text-lg text-pretty">{d.descripcion}</p>
+
+		<div class="text-muted-foreground mt-6 flex flex-wrap items-center gap-2 text-sm">
+			<span>{t("blog.porAutor", { autor: d.autor })}</span>
+			<span>·</span>
+			<time datetime={d.publicado.toISOString()}>
+				{formatearFecha(d.publicado, locale)}
+			</time>
+			{
+				d.actualizado && (
+					<>
+						<span>·</span>
+						<span>
+							{t("common.actualizado")} {formatearFecha(d.actualizado, locale)}
+						</span>
+					</>
+				)
+			}
+		</div>
+
+		<div class="prose prose-neutral dark:prose-invert mt-10 max-w-none">
+			<Content />
+		</div>
+
+		{
+			d.etiquetas.length > 0 && (
+				<footer class="border-border mt-12 flex flex-wrap gap-2 border-t pt-6">
+					{d.etiquetas.map((etiqueta) => (
+						<Badge variant="secondary">{etiqueta}</Badge>
+					))}
+				</footer>
+			)
+		}
+	</article>
+</BaseLayout>

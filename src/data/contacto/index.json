@@ -1,0 +1,44 @@
+{
+	"telefono": "+503 7777-7777",
+	"whatsapp": "50377777777",
+	"correo": "contacto@lisbethgutierrez.com",
+	"direccion": "San Pedro Puxtla, Ahuachapán, El Salvador",
+	"departamento": "ahuachapan",
+	"distrito": "san-pedro-puxtla",
+	"horario": [
+		{
+			"dias": "Lunes a viernes",
+			"horas": "8:00 a.m. – 5:00 p.m."
+		},
+		{
+			"dias": "Sábados",
+			"horas": "9:00 a.m. – 12:00 m."
+		}
+	],
+	"redes": {
+		"facebook": "https://www.facebook.com/share/17S3s5Vo7t/",
+		"instagram": "https://www.instagram.com/asesoria.legal.lisbeth"
+	},
+	"motivosContacto": [
+		{
+			"id": "consulta-legal",
+			"etiqueta": "Consulta legal"
+		},
+		{
+			"id": "propiedad",
+			"etiqueta": "Interés en una propiedad"
+		},
+		{
+			"id": "vehiculo",
+			"etiqueta": "Alquiler de vehículo"
+		},
+		{
+			"id": "asesoria-academica",
+			"etiqueta": "Asesoría académica"
+		},
+		{
+			"id": "otro",
+			"etiqueta": "Otro"
+		}
+	]
+}

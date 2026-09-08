@@ -1,0 +1,152 @@
+---
+import { render } from "astro:content";
+import { localePathsFor, localizedUrl } from "@/i18n/routing";
+import { useTranslations } from "@/i18n";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Icon from "@/components/Icon.astro";
+import { Button } from "@/components/ui/button";
+import { getServicioPorArea, getServicios } from "@/lib/contenido";
+import { AREAS, AREA_IDS } from "@/lib/taxonomia";
+import { esquemaFaq, esquemaMigas, esquemaServicio, migasDe } from "@/lib/seo";
+import { whatsappUrl } from "@/lib/sitio";
+
+export async function getStaticPaths() {
+	// `area` goes in params (builds the URL) AND in props (to read it typed below).
+	return localePathsFor(
+		AREA_IDS.map((area) => ({ params: { area }, props: { area } })),
+	);
+}
+
+const { area, locale } = Astro.props as {
+	area: (typeof AREA_IDS)[number];
+	locale: "es";
+};
+
+const t = useTranslations(locale);
+const site = Astro.site ?? new URL("https://lisbethgutierrez.com");
+
+const servicio = await getServicioPorArea(area, locale);
+if (!servicio) {
+	// An area declared in taxonomia.ts with no content file: caught at build
+	// time, not in production.
+	throw new Error(
+		`Falta el contenido del area "${area}" en src/content/servicios/${locale}/.`,
+	);
+}
+
+const { Content } = await render(servicio);
+const d = servicio.data;
+
+const otras = (await getServicios(locale)).filter((s) => s.data.area !== area);
+
+const migas = migasDe(locale, [
+	{ nombre: t("servicios.titulo"), path: "/servicios" },
+	{ nombre: d.titulo },
+]);
+
+const mensaje = t("servicios.consultar", { area: d.titulo });
+---
+
+<BaseLayout
+	locale={locale}
+	titulo={d.seo.titulo ?? d.titulo}
+	descripcion={d.seo.descripcion ?? d.descripcionSeo}
+	noindex={d.seo.noindex}
+	esquemas={[
+		esquemaServicio(
+			{ titulo: d.titulo, descripcion: d.descripcionSeo },
+			Astro.url.pathname,
+			site,
+		),
+		esquemaFaq(d.faq),
+		esquemaMigas(migas, site),
+	]}
+>
+	<article class="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+		<nav aria-label="Migas de pan" class="text-muted-foreground mb-6 text-sm">
+			<a href={localizedUrl("/servicios", locale)} class="hover:text-foreground">
+				{t("servicios.titulo")}
+			</a>
+			<span class="mx-2">/</span>
+			<span class="text-foreground">{d.titulo}</span>
+		</nav>
+
+		<span
+			class="bg-secondary text-secondary-foreground mb-5 inline-flex size-14 items-center justify-center rounded-2xl"
+		>
+			<Icon name={AREAS[area].icono} size={28} />
+		</span>
+
+		<h1 class="font-serif text-4xl font-bold tracking-tight text-balance">
+			{d.titulo}
+		</h1>
+		<p class="text-muted-foreground mt-4 text-lg text-pretty">{d.resumen}</p>
+
+		<div class="mt-8">
+			<Button
+				href={whatsappUrl(mensaje)}
+				target="_blank"
+				rel="noopener noreferrer"
+				size="lg"
+			>
+				{mensaje}
+			</Button>
+		</div>
+
+		{
+			d.subservicios.length > 0 && (
+				<section class="mt-14">
+					<h2 class="font-serif text-2xl font-bold">{t("servicios.incluye")}</h2>
+					<ul class="mt-5 grid gap-3 sm:grid-cols-2">
+						{d.subservicios.map((s) => (
+							<li class="border-border bg-card rounded-xl border p-4">
+								<h3 class="font-medium">{s.titulo}</h3>
+								<p class="text-muted-foreground mt-1 text-sm">{s.descripcion}</p>
+							</li>
+						))}
+					</ul>
+				</section>
+			)
+		}
+
+		<div class="prose prose-neutral dark:prose-invert mt-14 max-w-none">
+			<Content />
+		</div>
+
+		{
+			d.faq.length > 0 && (
+				<section class="mt-14">
+					<h2 class="font-serif text-2xl font-bold">{t("servicios.faq")}</h2>
+					<dl class="mt-5 space-y-4">
+						{d.faq.map((f) => (
+							<div class="border-border bg-card rounded-xl border p-5">
+								<dt class="font-medium">{f.pregunta}</dt>
+								<dd class="text-muted-foreground mt-2 text-sm">{f.respuesta}</dd>
+							</div>
+						))}
+					</dl>
+				</section>
+			)
+		}
+
+		{
+			otras.length > 0 && (
+				<section class="border-border mt-16 border-t pt-8">
+					<h2 class="text-lg font-semibold">{t("servicios.otrasAreas")}</h2>
+					<ul class="mt-4 flex flex-wrap gap-2">
+						{otras.map((s) => (
+							<li>
+								<a
+									href={localizedUrl(`/servicios/${s.data.area}`, locale)}
+									class="border-border hover:border-primary/40 hover:text-primary inline-block rounded-lg border px-3 py-1.5 text-sm transition-colors"
+								>
+									{s.data.titulo}
+								</a>
+							</li>
+						))}
+					</ul>
+				</section>
+			)
+		}
+	</article>
+</BaseLayout>

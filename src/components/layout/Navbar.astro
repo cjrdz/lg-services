@@ -1,0 +1,85 @@
+---
+import type { Locale } from "@/i18n/config";
+import { useTranslations } from "@/i18n";
+import { localizedUrl, stripLocale } from "@/i18n/routing";
+import { SITIO } from "@/lib/sitio";
+import ThemeToggle from "@/components/ThemeToggle.svelte";
+import MobileMenu from "./MobileMenu.svelte";
+
+interface Props {
+	locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+// Active route without the locale prefix, so highlighting works the same on
+// /servicios/ as on /en/servicios/.
+const actual = stripLocale(Astro.url.pathname);
+
+/*
+  `visible` isn't decorative: turning a section on without its page existing
+  leaves the menu linking to a 404. Happened with /vehiculos/ (still phase 5
+  at the time), and the server called it out:
+    [router] A `getStaticPaths()` route pattern was matched, but no matching
+    static path was found for requested path `/vehiculos/`.
+  That's why `modulos.vehiculos` starts false until the section exists.
+*/
+const enlaces = [
+	{ path: "/servicios", label: t("nav.servicios"), visible: true },
+	{
+		path: "/propiedades",
+		label: t("nav.propiedades"),
+		visible: SITIO.modulos.propiedades,
+	},
+	{ path: "/vehiculos", label: t("nav.vehiculos"), visible: SITIO.modulos.vehiculos },
+	{ path: "/blog", label: t("nav.blog"), visible: SITIO.modulos.blog },
+	{ path: "/contacto", label: t("nav.contacto"), visible: true },
+]
+	.filter((e) => e.visible)
+	.map((e) => ({
+		href: localizedUrl(e.path, locale),
+		label: e.label,
+		activo: actual === `${e.path}/` || actual.startsWith(`${e.path}/`),
+	}));
+---
+
+<header
+	class="bg-background/85 border-border sticky top-0 z-50 border-b backdrop-blur-md"
+>
+	<div class="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4 sm:px-6">
+		<a
+			href={localizedUrl("/", locale)}
+			class="font-serif text-lg font-semibold tracking-tight whitespace-nowrap"
+		>
+			{SITIO.nombre}
+		</a>
+
+		<nav
+			class="ml-auto hidden items-center gap-1 md:flex"
+			aria-label={t("nav.menuPrincipal")}
+		>
+			{
+				enlaces.map((enlace) => (
+					<a
+						href={enlace.href}
+						aria-current={enlace.activo ? "page" : undefined}
+						class="hover:bg-muted aria-[current=page]:text-primary rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+					>
+						{enlace.label}
+					</a>
+				))
+			}
+		</nav>
+
+		<div class="ml-auto flex items-center gap-1 md:ml-0">
+			<ThemeToggle client:load />
+			<MobileMenu
+				client:load
+				enlaces={enlaces}
+				etiquetaAbrir={t("nav.abrirMenu")}
+				etiquetaCerrar={t("nav.cerrarMenu")}
+			/>
+		</div>
+	</div>
+</header>

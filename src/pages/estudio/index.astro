@@ -1,0 +1,80 @@
+---
+export const prerender = false;
+
+import { DEFAULT_LOCALE } from "@/i18n/config";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import MediaManager from "@/components/estudio/MediaManager.svelte";
+import SignIn from "@/components/estudio/SignIn.svelte";
+
+/**
+ * Internal tool, not content. Deliberately lives outside [...lang]/: never
+ * translated, never indexed (noindex here and Disallow in robots.txt).
+ */
+const { editor } = Astro.locals;
+
+/*
+  In DEVELOPMENT the studio can't work, and that needs to be said instead of
+  offering a button that leads to a 404:
+
+   · Keystatic runs in LOCAL mode (writes straight to disk, no login), so its
+     GitHub OAuth routes DON'T EXIST. The "Sign in with GitHub" button used
+     to 404 at /api/keystatic/github/login.
+   · There's also no R2 binding, so there'd be nowhere to upload photos.
+
+  The studio is tested against the compiled worker: bun run build && bun run preview.
+*/
+const enDesarrollo = import.meta.env.DEV;
+---
+
+<BaseLayout
+	locale={DEFAULT_LOCALE}
+	titulo="Estudio de fotos"
+	descripcion="Herramienta interna para subir fotos de anuncios."
+	noindex
+>
+	<noscript>
+		<div class="mx-auto max-w-md px-4 py-20 text-center sm:px-6">
+			<h1 class="font-serif text-2xl font-bold">Estudio de fotos</h1>
+			<p class="text-muted-foreground mt-3 text-sm">
+				Esta herramienta necesita JavaScript para preparar y subir las fotos. Activalo
+				en el navegador y volvé a cargar la página.
+			</p>
+		</div>
+	</noscript>
+
+	{
+		enDesarrollo && !editor ? (
+			<div class="mx-auto max-w-lg px-4 py-20 sm:px-6">
+				<h1 class="font-serif text-2xl font-bold tracking-tight">Estudio de fotos</h1>
+				<p class="text-muted-foreground mt-3 text-sm">
+					En el servidor de desarrollo el estudio no funciona, y no es un error:
+				</p>
+				<ul class="text-muted-foreground mt-4 list-disc space-y-2 pl-5 text-sm">
+					<li>
+						Keystatic corre en <strong>modo local</strong> (escribe directo al disco,
+						sin login), así que no existe la sesión de GitHub que el estudio reutiliza.
+					</li>
+					<li>
+						Tampoco hay <strong>bucket R2</strong>, así que no habría dónde subir las
+						fotos.
+					</li>
+				</ul>
+				<p class="mt-5 text-sm">Para probarlo de verdad, contra el worker compilado:</p>
+				<pre class="bg-muted mt-2 overflow-x-auto rounded-lg p-3 text-xs">
+					<code>bun run build && bun run preview</code>
+				</pre>
+				<p class="text-muted-foreground mt-4 text-sm">
+					Mientras tanto, el panel sí se puede usar acá:{" "}
+					<a href="/keystatic" class="text-primary hover:underline">
+						abrir /keystatic
+					</a>
+					.
+				</p>
+			</div>
+		) : editor ? (
+			<MediaManager client:only="svelte" />
+		) : (
+			<SignIn client:only="svelte" />
+		)
+	}
+</BaseLayout>

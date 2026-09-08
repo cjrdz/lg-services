@@ -1,43 +1,64 @@
-# Astro Starter Kit: Minimal
+# lg-services
 
-```sh
-bun create astro@latest -- --template minimal
+Sitio de **Lisbeth Gutiérrez** — asesoría legal, propiedades y alquiler de vehículos
+en El Salvador.
+
+Reemplaza a `lg-blog`. La diferencia de fondo: aquí el contenido lo edita ella misma
+desde `/keystatic`, sin tocar git ni la terminal.
+
+## Stack
+
+Astro 7 · Svelte 5 · Tailwind v4 · shadcn-svelte · Keystatic 6 · Cloudflare Workers + R2
+
+## Requisitos
+
+- Node 22.12+
+- Bun 1.4+
+
+## Empezar
+
+```bash
+bun install
+cp .env.example .env    # llenar cuando toque configurar Keystatic
+bun run dev             # http://localhost:4321
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+El panel de administración vive en `/keystatic` (modo local en desarrollo, modo
+GitHub en producción).
 
-## 🚀 Project Structure
+## Comandos
 
-Inside of your Astro project, you'll see the following folders and files:
+| Comando                | Qué hace                                                       |
+| ---------------------- | -------------------------------------------------------------- |
+| `bun run dev`          | Servidor de desarrollo                                         |
+| `bun run verify`       | Colores + tipos + tests + build. **Correr antes de commitear** |
+| `bun run build`        | Build de producción                                            |
+| `bun run deploy:check` | Build + `wrangler deploy --dry-run`                            |
+| `bun run deploy`       | Build y despliegue a Cloudflare                                |
+| `bun run cf-typegen`   | Regenerar tipos del Worker tras editar `wrangler.jsonc`        |
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+## Estructura
+
+```
+src/
+├─ pages/[...lang]/     Todas las rutas. El segmento de idioma es opcional:
+│                       un solo archivo sirve /contacto/ y /en/contacto/.
+├─ i18n/                config (LOCALES), routing (localizedUrl), textos
+├─ components/
+│  └─ ui/               Generado por shadcn-svelte — no editar a mano
+├─ lib/
+└─ styles/global.css    ÚNICO lugar donde se definen colores
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+Las convenciones del proyecto están en [`AGENTS.md`](./AGENTS.md).
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## Despliegue
 
-Any static assets, like images, can be placed in the `public/` directory.
+Cloudflare Workers con assets estáticos. Las fotos de los anuncios viven en un bucket
+R2 (`MEDIA`), servido desde un dominio propio — no desde la URL `pub-*.r2.dev`.
 
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `bun install`             | Installs dependencies                            |
-| `bun dev`             | Starts local dev server at `localhost:4321`      |
-| `bun build`           | Build your production site to `./dist/`          |
-| `bun preview`         | Preview your build locally, before deploying     |
-| `bun astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `bun astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+```bash
+bunx wrangler r2 bucket create lg-services-media
+bunx wrangler secret put KEYSTATIC_SECRET
+bun run deploy
+```

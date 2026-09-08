@@ -1,0 +1,52 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "lg-services",
+	"compatibility_date": "2026-09-03",
+
+	// Keystatic arrastra `cookie` y shims de crypto de Node en su handler de API.
+	"compatibility_flags": ["nodejs_compat"],
+
+	"observability": { "enabled": true },
+
+	// Fotos de anuncios. NO viven en el repo: ver el plan, "Media pipeline".
+	// Crear con:  bunx wrangler r2 bucket create lg-services-media
+	"r2_buckets": [
+		{
+			"binding": "MEDIA",
+			"bucket_name": "lg-services-media",
+			"preview_bucket_name": "lg-services-media-dev",
+		},
+	],
+
+	"vars": {
+		/*
+		  Dirección pública del bucket. ES EL ÚNICO LUGAR donde se define: todas
+		  las URLs de fotos salen de r2Url() en src/lib/media/r2.ts.
+
+		  PENDIENTE: reemplazar por la URL que da Cloudflare al activar
+		  "Public Development URL" en el bucket (queda como
+		  https://pub-<hash>.r2.dev). Ver SETUP-R2.md.
+
+		  Cuando haya dominio propio, se cambia esta línea por
+		  https://cdn.<dominio> y no hay nada más que tocar.
+		*/
+		"PUBLIC_MEDIA_BASE_URL": "PENDIENTE-VER-SETUP-R2.md",
+
+		/*
+		  Dominio del sitio. Sin dominio propio va la URL de workers.dev que
+		  Cloudflare asigna al desplegar (la dice `wrangler deploy`).
+		  Alimenta canónicas, sitemap, hreflang y Open Graph.
+		*/
+		"PUBLIC_SITE_URL": "PENDIENTE-VER-SETUP-DESPLIEGUE.md",
+
+		/*
+		  Slug de la GitHub App que crea el asistente de Keystatic. Es público
+		  (va al navegador); los tres secretos que lo acompañan se cargan con
+		  `wrangler secret put`. Ver SETUP-DESPLIEGUE.md.
+		*/
+		"PUBLIC_KEYSTATIC_GITHUB_APP_SLUG": "PENDIENTE-VER-SETUP-DESPLIEGUE.md",
+	},
+
+	// Los secretos (KEYSTATIC_GITHUB_CLIENT_ID / _SECRET, KEYSTATIC_SECRET) se
+	// cargan con `wrangler secret put`, nunca aquí.
+}

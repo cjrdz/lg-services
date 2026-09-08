@@ -1,0 +1,124 @@
+---
+import type { Locale } from "@/i18n/config";
+import { useTranslations } from "@/i18n";
+import { localizedUrl } from "@/i18n/routing";
+import { CONTACTO, SITIO, redesActivas, telUrl, whatsappUrl } from "@/lib/sitio";
+import Icon from "@/components/Icon.astro";
+
+interface Props {
+	locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const anio = new Date().getFullYear();
+const redes = redesActivas();
+
+/*
+  Empty on purpose. These two pages used to be linked from the footer — so,
+  from all 20 pages on the site — but didn't exist: 40 links to a 404.
+  They'll be added back once the pages exist.
+  `bun run lint:links` keeps this from happening again.
+*/
+const legales: Array<{ path: string; label: string }> = [];
+---
+
+<footer class="border-border bg-muted/30 mt-16 border-t">
+	<div class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+		<div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+			<div>
+				<p class="font-serif text-lg font-semibold">{SITIO.nombre}</p>
+				<p class="text-muted-foreground mt-1 text-sm">{SITIO.profesion}</p>
+				<p class="text-muted-foreground mt-4 text-sm">{CONTACTO.direccion}</p>
+			</div>
+
+			<div>
+				<h2 class="text-sm font-semibold">{t("contacto.titulo")}</h2>
+				<ul class="text-muted-foreground mt-3 space-y-2 text-sm">
+					<li>
+						<a href={telUrl()} class="hover:text-foreground transition-colors">
+							{CONTACTO.telefono}
+						</a>
+					</li>
+					<li>
+						<a
+							href={whatsappUrl()}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="hover:text-foreground transition-colors"
+						>
+							{t("common.whatsapp")}
+						</a>
+					</li>
+					<li>
+						<a
+							href={`mailto:${CONTACTO.correo}`}
+							class="hover:text-foreground transition-colors"
+						>
+							{CONTACTO.correo}
+						</a>
+					</li>
+				</ul>
+			</div>
+
+			<div>
+				<h2 class="text-sm font-semibold">{t("contacto.horario")}</h2>
+				<ul class="text-muted-foreground mt-3 space-y-1 text-sm">
+					{
+						CONTACTO.horario.map((h) => (
+							<li>
+								<span class="text-foreground">{h.dias}:</span> {h.horas}
+							</li>
+						))
+					}
+				</ul>
+
+				{
+					redes.length > 0 && (
+						<div class="mt-4 flex gap-2">
+							{redes.map((r) => (
+								<a
+									href={r.url}
+									target="_blank"
+									rel="noopener noreferrer"
+									aria-label={r.red}
+									class="hover:bg-muted inline-flex size-9 items-center justify-center rounded-lg transition-colors"
+								>
+									<Icon name={r.icono} size={18} />
+								</a>
+							))}
+						</div>
+					)
+				}
+			</div>
+		</div>
+
+		<div
+			class="border-border text-muted-foreground mt-10 flex flex-col gap-3 border-t pt-6 text-sm sm:flex-row sm:items-center sm:justify-between"
+		>
+			<p>© {anio} {SITIO.nombreLegal}</p>
+
+			<nav class="flex flex-wrap gap-4">
+				{
+					legales.map((l) => (
+						<a
+							href={localizedUrl(l.path, locale)}
+							class="hover:text-foreground transition-colors"
+						>
+							{l.label}
+						</a>
+					))
+				}
+				<a
+					href="https://jrdz.dev"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="hover:text-foreground transition-colors"
+				>
+					creado por jrdz.dev
+				</a>
+			</nav>
+		</div>
+	</div>
+</footer>

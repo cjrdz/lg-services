@@ -1,0 +1,45 @@
+{
+	"referencia": "V-0001",
+	"marca": "Toyota",
+	"modelo": "RAV4",
+	"anio": 2022,
+	"categoria": "suv",
+	"transmision": "automatica",
+	"combustible": "gasolina",
+	"traccion": "4x2",
+	"pasajeros": 5,
+	"puertas": 5,
+	"maletas": 3,
+	"aireAcondicionado": true,
+	"tarifaDiaria": 55,
+	"tarifaSemanal": 330,
+	"tarifaMensual": 1200,
+	"deposito": 300,
+	"kilometraje": "ilimitado",
+	"edadMinima": 23,
+	"requisitos": [
+		"Licencia de conducir vigente",
+		"DUI o pasaporte",
+		"Tarjeta de crédito para el depósito"
+	],
+	"disponibilidad": "disponible",
+	"entrega": ["san-salvador", "la-libertad"],
+	"fotos": [
+		{
+			"ruta": "media/vehiculos/toyota-rav4-2022/ejemplo1",
+			"alt": "Toyota RAV4 2022 gris, vista frontal tres cuartos"
+		},
+		{
+			"ruta": "media/vehiculos/toyota-rav4-2022/ejemplo2",
+			"alt": "Interior del RAV4 con tablero y consola central"
+		}
+	],
+	"portada": 0,
+	"titulo": "Toyota RAV4 2022 automática, ideal para carretera",
+	"descripcionCorta": "SUV automática de 5 pasajeros con aire acondicionado, kilometraje ilimitado y entrega en San Salvador y La Libertad.",
+	"descripcion": "Toyota RAV4 2022 en excelente estado, con mantenimiento al día y revisión antes de cada alquiler. Automática, cinco pasajeros, aire acondicionado y espacio para tres maletas grandes. Cómoda tanto para ciudad como para viajes largos por carretera.\n\nIncluye kilometraje ilimitado y seguro básico. La entrega se coordina en San Salvador o La Libertad sin costo adicional.\n\nESTA ES UNA FICHA DE EJEMPLO para verificar que el sitio funciona. Se puede borrar desde el panel cuando haya vehículos reales.",
+	"destacado": true,
+	"orden": 0,
+	"publicado": "2026-09-07",
+	"borrador": true
+}

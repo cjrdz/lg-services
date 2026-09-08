@@ -1,0 +1,28 @@
+{
+	"heroTitulo": "Soluciones legales claras y cercanas",
+	"heroSubtitulo": "Asesoría y consultoría legal profesional en El Salvador, además de propiedades y vehículos en alquiler.",
+	"heroImagen": "/src/assets/images/perfil.jpg",
+	"heroImagenAlt": "Lisbeth Gutiérrez, asesora legal",
+	"heroCtaTexto": "Agendar consulta",
+	"heroCtaUrl": "/contacto",
+	"propuestas": [
+		{
+			"icono": "lucide:scale",
+			"titulo": "Asesoría legal",
+			"descripcion": "Acompañamiento en derecho civil, laboral, de familia, penal, tributario e inmobiliario."
+		},
+		{
+			"icono": "lucide:home",
+			"titulo": "Propiedades y terrenos",
+			"descripcion": "Casas, apartamentos y terrenos en venta y alquiler, con la parte legal resuelta."
+		},
+		{
+			"icono": "lucide:car",
+			"titulo": "Alquiler de vehículos",
+			"descripcion": "Vehículos disponibles por día, semana o mes, con entrega en varios departamentos."
+		}
+	],
+	"mostrarPropiedadesDestacadas": true,
+	"mostrarVehiculosDestacados": true,
+	"maxDestacados": 3
+}

@@ -1,0 +1,57 @@
+---
+import { Image } from "astro:assets";
+import { requerirImagen } from "@/lib/imagenes";
+
+/**
+ * Repo image (portrait, office photos, blog covers), optimized at build
+ * time from the path Keystatic stores.
+ *
+ * Generates WebP at several widths plus a srcset, so a phone never
+ * downloads the desktop version. Listing photos (R2) use a different component.
+ */
+interface Props {
+	/** Path Keystatic stores: "/src/assets/images/perfil.jpg" */
+	src: string;
+	alt: string;
+	/** For debugging when the path doesn't exist. */
+	contexto?: string;
+	widths?: number[];
+	sizes?: string;
+	/** Fixed crop. Without it, the original aspect ratio is kept. */
+	ratio?: string;
+	loading?: "lazy" | "eager";
+	fetchpriority?: "high" | "low" | "auto";
+	class?: string;
+}
+
+const {
+	src,
+	alt,
+	contexto = "imagen",
+	widths = [480, 800, 1200, 1800],
+	sizes = "(min-width: 1024px) 50vw, 100vw",
+	ratio,
+	loading = "lazy",
+	fetchpriority = "auto",
+	class: className,
+} = Astro.props;
+
+const imagen = requerirImagen(src, contexto);
+
+// Never request widths larger than the original: upscaling only adds weight
+// without looking any better.
+const anchos = widths.filter((w) => w <= imagen.width);
+if (anchos.length === 0) anchos.push(imagen.width);
+---
+
+<Image
+	src={imagen}
+	alt={alt}
+	widths={anchos}
+	sizes={sizes}
+	loading={loading}
+	decoding="async"
+	fetchpriority={fetchpriority}
+	style={ratio ? `aspect-ratio:${ratio}` : undefined}
+	class:list={[ratio && "size-full object-cover", className]}
+/>

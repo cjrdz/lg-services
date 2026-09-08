@@ -1,0 +1,127 @@
+---
+import { localePaths } from "@/i18n/routing";
+import { localizedUrl } from "@/i18n/routing";
+import { useTranslations } from "@/i18n";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Icon from "@/components/Icon.astro";
+import ImagenLocal from "@/components/ImagenLocal.astro";
+import { Button } from "@/components/ui/button";
+import * as Card from "@/components/ui/card";
+import { INICIO, SITIO } from "@/lib/sitio";
+import { areasOrdenadas } from "@/lib/taxonomia";
+import { esquemaNegocio, esquemaSitioWeb } from "@/lib/seo";
+
+export const getStaticPaths = localePaths;
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const site = Astro.site ?? new URL("https://lisbethgutierrez.com");
+
+const areas = areasOrdenadas(locale);
+---
+
+<BaseLayout
+	locale={locale}
+	titulo={SITIO.nombre}
+	descripcion={t("sitio.descripcion")}
+	tituloExacto
+	esquemas={[esquemaNegocio(site), esquemaSitioWeb(site)]}
+>
+	<section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
+		<div class="aparece grid items-center gap-10 lg:grid-cols-2">
+			<div>
+				<h1
+					class="font-serif text-4xl font-bold tracking-tight text-balance sm:text-5xl"
+				>
+					{INICIO.heroTitulo}
+				</h1>
+				<p class="text-muted-foreground mt-5 text-lg text-pretty">
+					{INICIO.heroSubtitulo}
+				</p>
+				<div class="mt-8 flex flex-wrap gap-3">
+					<Button href={localizedUrl(INICIO.heroCtaUrl, locale)} size="lg">
+						{INICIO.heroCtaTexto}
+					</Button>
+					<Button href={localizedUrl("/servicios", locale)} variant="outline" size="lg">
+						{t("home.heroCtaSecundario")}
+					</Button>
+				</div>
+			</div>
+
+			{
+				/*
+			  VERTICAL portrait (perfil.jpg is 1800x2700, a 2:3 ratio). It used to
+			  be forced into a horizontal 4/3 box with object-cover, which cropped
+			  off half the height and cut off her head.
+
+			  Now the box is vertical (3/4, close to the original ratio: crops
+			  ~11%) and the crop comes from the bottom, not the face, thanks to
+			  object-position: top. max-h stops the photo from eating the whole
+			  first screen on wide displays.
+			*/
+			}
+			<div
+				class="bg-muted mx-auto max-h-[32rem] w-full max-w-sm overflow-hidden rounded-2xl lg:max-w-none"
+			>
+				<ImagenLocal
+					src={INICIO.heroImagen}
+					alt={INICIO.heroImagenAlt}
+					contexto="heroImagen de src/data/inicio/index.json"
+					ratio="3 / 4"
+					sizes="(min-width: 1024px) 28rem, (min-width: 640px) 24rem, 90vw"
+					loading="eager"
+					fetchpriority="high"
+					class="object-top"
+				/>
+			</div>
+		</div>
+	</section>
+
+	{
+		INICIO.propuestas.length > 0 && (
+			<section class="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
+				<div class="aparece aparece-escalonado grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+					{INICIO.propuestas.map((p) => (
+						<Card.Root>
+							<Card.Header>
+								<span class="bg-secondary text-secondary-foreground mb-2 inline-flex size-11 items-center justify-center rounded-xl">
+									<Icon name={p.icono} size={22} />
+								</span>
+								<Card.Title>{p.titulo}</Card.Title>
+								<Card.Description>{p.descripcion}</Card.Description>
+							</Card.Header>
+						</Card.Root>
+					))}
+				</div>
+			</section>
+		)
+	}
+
+	<section class="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
+		<div class="mb-8">
+			<h2 class="font-serif text-3xl font-bold tracking-tight">
+				{t("home.seccionServicios")}
+			</h2>
+			<p class="text-muted-foreground mt-2">{t("home.seccionServiciosTexto")}</p>
+		</div>
+
+		<div class="aparece aparece-escalonado grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+			{
+				areas.map((area) => (
+					<a
+						href={localizedUrl(`/servicios/${area.id}`, locale)}
+						class="border-border bg-card hover:border-primary/40 group elevable rounded-xl border p-5"
+					>
+						<span class="bg-secondary text-secondary-foreground mb-3 inline-flex size-10 items-center justify-center rounded-lg">
+							<Icon name={area.icono} size={20} />
+						</span>
+						<h3 class="group-hover:text-primary font-semibold transition-colors">
+							{area.titulo}
+						</h3>
+						<p class="text-muted-foreground mt-1 text-sm">{area.resumen}</p>
+					</a>
+				))
+			}
+		</div>
+	</section>
+</BaseLayout>

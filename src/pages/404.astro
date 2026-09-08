@@ -1,0 +1,47 @@
+---
+/**
+ * The 404 page lives at the ROOT, not under [...lang]/.
+ *
+ * Astro only recognizes `src/pages/404.astro` as the error route. Placed
+ * under `[...lang]/` it becomes a normal page served at `/404/`, and unknown
+ * routes fall through to Astro's generic 404 — exactly what happened before
+ * this file was moved.
+ *
+ * Also, with `trailingSlash: "always"` a `[...lang]/404.astro` emits
+ * `dist/404/index.html` and never `dist/404.html`, the file Cloudflare
+ * actually serves. jrdz.dev papered over that with a `cp` in its build
+ * script; not needed here.
+ *
+ * Cloudflare serves ONE error page per site, so this stays in the default
+ * locale. If an English 404 is ever needed, add `[...lang]/404.astro` for
+ * `/en/404/` and this one stays as the fallback.
+ */
+import { DEFAULT_LOCALE } from "@/i18n/config";
+import { localizedUrl } from "@/i18n/routing";
+import { useTranslations } from "@/i18n";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { Button } from "@/components/ui/button";
+
+const locale = DEFAULT_LOCALE;
+const t = useTranslations(locale);
+---
+
+<BaseLayout
+	locale={locale}
+	titulo={t("errores.404titulo")}
+	descripcion={t("errores.404mensaje")}
+	noindex
+>
+	<section
+		class="mx-auto flex max-w-2xl flex-col items-center px-4 py-24 text-center sm:px-6"
+	>
+		<p class="text-muted-foreground font-serif text-6xl font-bold">404</p>
+		<h1 class="mt-4 font-serif text-3xl font-bold tracking-tight">
+			{t("errores.404titulo")}
+		</h1>
+		<p class="text-muted-foreground mt-3">{t("errores.404mensaje")}</p>
+		<Button href={localizedUrl("/", locale)} class="mt-8" size="lg">
+			{t("errores.404inicio")}
+		</Button>
+	</section>
+</BaseLayout>

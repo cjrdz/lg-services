@@ -1,0 +1,58 @@
+name: Verificar
+
+# Corre en cada push a main y en cada PR.
+#
+# Importa más de lo que parece: cuando Lisbeth publica desde /keystatic, eso es
+# un commit a main hecho por ella. Si el contenido no pasa las validaciones de
+# zod, el build de Cloudflare falla y el despliegue anterior sigue en vivo —
+# bien— pero ella no se entera de nada. Este workflow deja el error visible en
+# GitHub, con el mensaje en español que escribió el esquema.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.4.0"
+
+      - name: Instalar dependencias
+        run: bun install --frozen-lockfile
+
+      - name: Colores literales fuera de global.css
+        run: bun run lint:colors
+
+      - name: ESLint
+        run: bun run lint
+
+      - name: Tipos
+        run: bun run check
+
+      - name: Pruebas
+        run: bun run test
+
+      # Acá es donde se cae un contenido inválido publicado desde el panel.
+      - name: Build
+        run: bun run build
+
+      - name: Enlaces internos rotos
+        run: bun run lint:links
+
+      # El worker compilado tiene un tope de tamaño en Cloudflare; que se pase
+      # es el tipo de cosa que uno descubre al desplegar si no se mide antes.
+      - name: Tamaño del worker
+        run: |
+          TAM=$(du -sk dist/server | cut -f1)
+          echo "Worker: ${TAM} KB"
+          if [ "$TAM" -gt 8000 ]; then
+            echo "::warning::El worker pesa ${TAM} KB; el límite de Cloudflare es 10 MB comprimido."
+          fi

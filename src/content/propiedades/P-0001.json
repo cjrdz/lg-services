@@ -1,0 +1,45 @@
+{
+	"referencia": "P-0001",
+	"operacion": "venta",
+	"tipo": "casa",
+	"estado": "disponible",
+	"precio": 125000,
+	"periodoPrecio": "total",
+	"precioNegociable": true,
+	"superficie": {
+		"valor": 220,
+		"unidad": "m2"
+	},
+	"superficieConstruidaM2": 165,
+	"habitaciones": 3,
+	"banos": 2.5,
+	"parqueos": 2,
+	"niveles": 2,
+	"anioConstruccion": 2015,
+	"amenidades": ["jardin", "garita", "agua-potable", "energia-electrica"],
+	"ubicacion": {
+		"discriminant": "la-libertad",
+		"value": {
+			"distrito": "santa-tecla",
+			"zona": "Col. Las Delicias"
+		}
+	},
+	"fotos": [
+		{
+			"ruta": "media/propiedades/casa-santa-tecla-3h/ejemplo1",
+			"alt": "Fachada frontal de la casa con jardín delantero"
+		},
+		{
+			"ruta": "media/propiedades/casa-santa-tecla-3h/ejemplo2",
+			"alt": "Sala principal con ventanales al jardín"
+		}
+	],
+	"portada": 0,
+	"titulo": "Casa de 3 habitaciones en Santa Tecla con jardín",
+	"descripcionCorta": "Casa de dos niveles en colonia con seguridad, 165 m² construidos sobre terreno de 220 m², con jardín y espacio para dos vehículos.",
+	"descripcion": "Casa de dos niveles ubicada en Col. Las Delicias, Santa Tecla. Cuenta con tres habitaciones, dos baños y medio, sala, comedor, cocina y área de lavandería. El terreno mide 220 m² y el área construida es de 165 m². Tiene jardín delantero y espacio techado para dos vehículos. La colonia cuenta con garita de seguridad las 24 horas. Escrituras en regla y libre de gravámenes.\n\nESTA ES UNA FICHA DE EJEMPLO para verificar que el sitio funciona. Se puede borrar desde el panel cuando haya anuncios reales.",
+	"destacada": true,
+	"orden": 0,
+	"publicada": "2026-09-06",
+	"borrador": true
+}

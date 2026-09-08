@@ -1,0 +1,56 @@
+---
+import type { Locale } from "@/i18n/config";
+import { localizedUrl } from "@/i18n/routing";
+import Icon from "@/components/Icon.astro";
+import { Badge } from "@/components/ui/badge";
+import { formatearFecha, slugDe, type Entrada } from "@/lib/contenido";
+import { AREAS, areaTitulo } from "@/lib/taxonomia";
+
+interface Props {
+	entrada: Entrada;
+	locale: Locale;
+}
+
+const { entrada, locale } = Astro.props;
+const d = entrada.data;
+
+const href = localizedUrl(`/blog/${slugDe(entrada.id)}`, locale);
+---
+
+<article
+	class="border-border bg-card hover:border-primary/40 group elevable relative flex flex-col rounded-xl border p-5"
+>
+	<div class="flex items-center gap-2">
+		<span
+			class="bg-secondary text-secondary-foreground inline-flex size-8 items-center justify-center rounded-lg"
+		>
+			<Icon name={AREAS[d.area].icono} size={16} />
+		</span>
+		<span class="text-muted-foreground text-xs">{areaTitulo(d.area, locale)}</span>
+		{d.borrador && <Badge variant="outline">Borrador</Badge>}
+	</div>
+
+	<h3
+		class="group-hover:text-primary mt-3 font-semibold text-balance transition-colors"
+	>
+		<a href={href} class="after:absolute after:inset-0">{d.titulo}</a>
+	</h3>
+
+	<p class="text-muted-foreground mt-2 line-clamp-3 text-sm">{d.descripcion}</p>
+
+	<footer class="text-muted-foreground mt-4 flex items-center gap-2 text-xs">
+		<time datetime={d.publicado.toISOString()}>
+			{formatearFecha(d.publicado, locale)}
+		</time>
+		{
+			d.subtema && (
+				<>
+					<>
+						<span>·</span>
+						<span>{d.subtema}</span>
+					</>
+				</>
+			)
+		}
+	</footer>
+</article>

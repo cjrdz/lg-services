@@ -1,0 +1,170 @@
+---
+import { LOCALE_TAGS, OG_LOCALES, type Locale } from "@/i18n/config";
+import { useTranslations } from "@/i18n";
+import { ClientRouter } from "astro:transitions";
+import { canonical, hreflangs } from "@/lib/seo";
+import { SITIO } from "@/lib/sitio";
+import { POLITICA_MOVIMIENTO } from "@/lib/motion";
+import Navbar from "@/components/layout/Navbar.astro";
+import Footer from "@/components/layout/Footer.astro";
+import "@/styles/global.css";
+
+interface Props {
+	locale: Locale;
+	titulo: string;
+	descripcion: string;
+	/** Absolute path or URL of the social image. Defaults to the site's own. */
+	imagen?: string;
+	/** true on pages that shouldn't be indexed (404, /estudio). */
+	noindex?: boolean;
+	/** Structured data. Serialized as JSON-LD in the <head>. */
+	esquemas?: Array<Record<string, unknown> | null>;
+	/** Leaves the title as-is, without appending " | Lisbeth Gutiérrez". */
+	tituloExacto?: boolean;
+	tipoOg?: "website" | "article";
+}
+
+const {
+	locale,
+	titulo,
+	descripcion,
+	imagen,
+	noindex = false,
+	esquemas = [],
+	tituloExacto = false,
+	tipoOg = "website",
+} = Astro.props;
+
+const t = useTranslations(locale);
+const site = Astro.site ?? new URL("https://lisbethgutierrez.com");
+
+const tituloCompleto = tituloExacto ? titulo : `${titulo}${t("seo.sufijoTitulo")}`;
+const urlCanonica = canonical(Astro.url.pathname, site);
+const { alts, xDefault } = hreflangs(Astro.url.pathname, site);
+const imagenOg = new URL(imagen ?? SITIO.ogImagen, site).href;
+
+// Nulls are filtered out so `esquemaFaq()` can return null without every
+// page needing its own conditional.
+const esquemasValidos = esquemas.filter(
+	(e): e is Record<string, unknown> => e !== null && e !== undefined,
+);
+---
+
+<!doctype html>
+<!--
+  data-motion decides whether global.css's @media (prefers-reduced-motion)
+  block applies. See src/lib/motion.ts: one switch for both CSS animations
+  and icons.
+-->
+<html lang={LOCALE_TAGS[locale]} data-motion={POLITICA_MOVIMIENTO}>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="generator" content={Astro.generator} />
+
+		<title>{tituloCompleto}</title>
+		<meta name="description" content={descripcion} />
+		<meta name="author" content={SITIO.nombreLegal} />
+		<link rel="canonical" href={urlCanonica} />
+
+		{noindex && <meta name="robots" content="noindex, nofollow" />}
+
+		{/* Local Salvadoran business: helps region-based search. */}
+		<meta name="geo.region" content="SV" />
+		<meta name="geo.placename" content="El Salvador" />
+
+		{
+			alts.map((a) => (
+				<link rel="alternate" hreflang={LOCALE_TAGS[a.locale]} href={a.href} />
+			))
+		}
+		<link rel="alternate" hreflang="x-default" href={xDefault.href} />
+
+		<meta property="og:type" content={tipoOg} />
+		<meta property="og:site_name" content={SITIO.nombre} />
+		<meta property="og:title" content={tituloCompleto} />
+		<meta property="og:description" content={descripcion} />
+		<meta property="og:url" content={urlCanonica} />
+		<meta property="og:image" content={imagenOg} />
+		<meta property="og:locale" content={OG_LOCALES[locale]} />
+
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={tituloCompleto} />
+		<meta name="twitter:description" content={descripcion} />
+		<meta name="twitter:image" content={imagenOg} />
+
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="sitemap" href="/sitemap-index.xml" />
+		<link
+			rel="alternate"
+			type="application/rss+xml"
+			title={SITIO.nombre}
+			href="/rss.xml"
+		/>
+
+		{
+			/*
+		  Page transitions.
+
+		  Uses the browser's View Transitions API: the browser does the
+		  fade, not a script. Where it's unsupported, navigation is just the
+		  normal kind -- nothing to degrade.
+
+		  Watch the islands: on navigation, Astro re-hydrates them. That's
+		  why the theme is read at component construction rather than in
+		  onMount, and why theme-init.js runs on every document.
+		*/
+		}
+		<ClientRouter />
+
+		{/* Before paint, so there's no flash of light theme. */}
+		<script is:inline src="/scripts/theme-init.js"></script>
+
+		{
+			esquemasValidos.map((esquema) => (
+				<script type="application/ld+json" set:html={JSON.stringify(esquema)} />
+			))
+		}
+
+		{
+			/*
+		  THIS SLOT IS THE FIX FOR A REAL BUG.
+		  In lg-blog, pages passed <Fragment slot="head"> but the Layout
+		  never declared a slot with that name, so Astro silently discarded
+		  ALL of it: canonical, Open Graph, Twitter Card, and structured data
+		  never rendered. If you add a slot="head" to a page, verify it
+		  actually shows up in the HTML.
+		*/
+		}
+		{
+			/* Turnstile only loads if a key is configured: without one, not a byte. */
+			import.meta.env.PUBLIC_TURNSTILE_SITE_KEY && (
+				<script
+					is:inline
+					src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+					async
+					defer
+				/>
+			)
+		}
+
+		<slot name="head" />
+	</head>
+
+	<body class="flex min-h-dvh flex-col">
+		<a
+			href="#contenido"
+			class="bg-primary text-primary-foreground sr-only rounded-md px-4 py-2 focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50"
+		>
+			{t("nav.irAlContenido")}
+		</a>
+
+		<Navbar locale={locale} />
+
+		<main id="contenido" class="flex-1">
+			<slot />
+		</main>
+
+		<Footer locale={locale} />
+	</body>
+</html>
