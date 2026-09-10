@@ -1,9 +1,10 @@
 ---
 import type { Locale } from "@/i18n/config";
 import { localizedUrl } from "@/i18n/routing";
+import { useTranslations } from "@/i18n";
 import Icon from "@/components/Icon.astro";
 import { Badge } from "@/components/ui/badge";
-import { formatearFecha, slugDe, type Entrada } from "@/lib/contenido";
+import { formatearFecha, slugDe, tiempoLectura, type Entrada } from "@/lib/contenido";
 import { AREAS, areaTitulo } from "@/lib/taxonomia";
 
 interface Props {
@@ -12,22 +13,62 @@ interface Props {
 }
 
 const { entrada, locale } = Astro.props;
+const t = useTranslations(locale);
 const d = entrada.data;
 
 const href = localizedUrl(`/blog/${slugDe(entrada.id)}`, locale);
+
+/*
+  Reading time straight from the raw markdown. `tiempoLectura()` and the
+  `common.minutosLectura` string both already existed and neither was wired
+  to anything — this is where they were meant to go. Computed from `body`
+  rather than the rendered HTML so the card doesn't have to render the post.
+*/
+const minutos = tiempoLectura(entrada.body ?? "");
 ---
 
+{
+	/*
+  `min-w-0` en la tarjeta, no solo en el texto que se recorta.
+
+  Una tarjeta es un hijo de grilla, y por defecto un hijo de grilla tiene
+  `min-width: auto`: no puede achicarse por debajo del ancho mínimo de su
+  contenido. El `nowrap` que implica `truncate` viajaba hacia arriba por esa
+  cadena y ensanchaba la tarjeta entera — la página se corría 83 px a la
+  derecha en un teléfono de 390 px.
+*/
+}
 <article
-	class="border-border bg-card hover:border-primary/40 group elevable relative flex flex-col rounded-xl border p-5"
+	class="border-border bg-card hover:border-primary/40 group elevable relative flex min-w-0 flex-col rounded-xl border p-5"
 >
 	<div class="flex items-center gap-2">
 		<span
-			class="bg-secondary text-secondary-foreground inline-flex size-8 items-center justify-center rounded-lg"
+			class="bg-secondary text-secondary-foreground group-hover:bg-primary group-hover:text-primary-foreground color-animado inline-flex size-8 shrink-0 items-center justify-center rounded-lg"
 		>
 			<Icon name={AREAS[d.area].icono} size={16} />
 		</span>
-		<span class="text-muted-foreground text-xs">{areaTitulo(d.area, locale)}</span>
-		{d.borrador && <Badge variant="outline">Borrador</Badge>}
+		{
+			/* Subtema junto al área, no en el pie: ahí lo desplazaba el tiempo de
+		    lectura, y en dos líneas descuadraba las tarjetas de la fila. */
+		}
+		{
+			/*
+		  `min-w-0` no es decorativo: `truncate` implica `white-space: nowrap`, y
+		  un hijo de flex sin él no puede encogerse por debajo del ancho de su
+		  texto. Sin esto la tarjeta empujaba la página 83 px a la derecha en un
+		  teléfono de 390 px.
+		*/
+		}
+		<span class="text-muted-foreground min-w-0 truncate text-xs">
+			{areaTitulo(d.area, locale)}{d.subtema ? ` · ${d.subtema}` : ""}
+		</span>
+		{
+			d.borrador && (
+				<Badge variant="outline" class="shrink-0">
+					{t("common.borrador")}
+				</Badge>
+			)
+		}
 	</div>
 
 	<h3
@@ -38,19 +79,23 @@ const href = localizedUrl(`/blog/${slugDe(entrada.id)}`, locale);
 
 	<p class="text-muted-foreground mt-2 line-clamp-3 text-sm">{d.descripcion}</p>
 
-	<footer class="text-muted-foreground mt-4 flex items-center gap-2 text-xs">
+	{
+		/* mt-auto pins the footer to the bottom, so cards in a row line up even
+	    when their summaries run to different lengths. */
+	}
+	<footer
+		class="text-muted-foreground mt-auto flex flex-wrap items-center gap-x-2 gap-y-1 pt-4 text-xs"
+	>
 		<time datetime={d.publicado.toISOString()}>
 			{formatearFecha(d.publicado, locale)}
 		</time>
-		{
-			d.subtema && (
-				<>
-					<>
-						<span>·</span>
-						<span>{d.subtema}</span>
-					</>
-				</>
-			)
-		}
+		<span>·</span>
+		<span>{t("common.minutosLectura", { n: minutos })}</span>
+
+		<Icon
+			name="lucide:arrow-right"
+			size={14}
+			class="text-primary flecha-tarjeta ml-auto"
+		/>
 	</footer>
 </article>

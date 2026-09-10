@@ -25,25 +25,40 @@
 <article
 	class="border-border bg-card hover:border-primary/40 group elevable relative overflow-hidden rounded-xl border {clase}"
 >
-	{#if r2Url(tarjeta.foto, 480)}
-		<img
-			src={r2Url(tarjeta.foto, 480)}
-			srcset={r2Srcset(tarjeta.foto, ANCHOS_TARJETA)}
-			sizes="(min-width: 1280px) 20rem, (min-width: 640px) 45vw, 90vw"
-			alt={tarjeta.alt}
-			loading="lazy"
-			decoding="async"
-			style="aspect-ratio:4/3"
-			class="bg-muted w-full object-cover"
-		/>
-	{:else}
-		<div
-			class="bg-muted text-muted-foreground flex w-full items-center justify-center text-xs"
-			style="aspect-ratio:4/3"
-		>
-			{textos.sinFoto}
-		</div>
-	{/if}
+	<!--
+		The photo is clipped here rather than on the <img>, so the zoom on hover
+		happens inside a frame that doesn't move.
+	-->
+	<div class="relative overflow-hidden">
+		{#if r2Url(tarjeta.foto, 480)}
+			<img
+				src={r2Url(tarjeta.foto, 480)}
+				srcset={r2Srcset(tarjeta.foto, ANCHOS_TARJETA)}
+				sizes="(min-width: 1280px) 20rem, (min-width: 640px) 45vw, 90vw"
+				alt={tarjeta.alt}
+				loading="lazy"
+				decoding="async"
+				style="aspect-ratio:4/3"
+				class="zoom-foto bg-muted w-full object-cover"
+			/>
+		{:else}
+			<div
+				class="bg-muted text-muted-foreground flex w-full items-center justify-center text-xs"
+				style="aspect-ratio:4/3"
+			>
+				{textos.sinFoto}
+			</div>
+		{/if}
+
+		<!-- Over the photo: it belongs to the listing's status, not to its price. -->
+		{#if tarjeta.insignia}
+			<span
+				class="bg-background/90 text-foreground absolute top-2 left-2 rounded-md px-2 py-0.5 text-xs font-medium backdrop-blur-sm"
+			>
+				{tarjeta.insignia}
+			</span>
+		{/if}
+	</div>
 
 	<div class="p-4">
 		<div class="flex items-start justify-between gap-2">
@@ -55,13 +70,21 @@
 					</span>
 				{/if}
 			</p>
-			{#if tarjeta.insignia}
-				<span
-					class="bg-secondary text-secondary-foreground shrink-0 rounded px-2 py-0.5 text-xs"
-				>
-					{tarjeta.insignia}
-				</span>
-			{/if}
+			<svg
+				aria-hidden="true"
+				width="16"
+				height="16"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				class="text-primary flecha-tarjeta mt-0.5 shrink-0"
+			>
+				<path d="M5 12h14" />
+				<path d="m12 5 7 7-7 7" />
+			</svg>
 		</div>
 
 		<h3 class="group-hover:text-primary mt-1 font-medium transition-colors">

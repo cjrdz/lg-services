@@ -41,8 +41,10 @@ const esquemaBlog = {
 	esquemas={[esquemaBlog, esquemaMigas(migas, site)]}
 >
 	<section class="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-		<h1 class="font-serif text-4xl font-bold tracking-tight">{t("blog.titulo")}</h1>
-		<p class="text-muted-foreground mt-3 max-w-2xl text-lg">
+		<h1 class="aparece font-serif text-4xl font-bold tracking-tight">
+			{t("blog.titulo")}
+		</h1>
+		<p class="aparece text-muted-foreground mt-3 max-w-2xl text-lg">
 			{t("blog.descripcion")}
 		</p>
 
@@ -50,7 +52,7 @@ const esquemaBlog = {
 			recientes.length > 0 ? (
 				<>
 					<h2 class="mt-12 font-serif text-2xl font-bold">{t("blog.recientes")}</h2>
-					<div class="aparece aparece-escalonado mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+					<div class="aparece-escalonado mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 						{recientes.map((entrada) => (
 							<TarjetaEntrada entrada={entrada} locale={locale} />
 						))}
@@ -64,8 +66,10 @@ const esquemaBlog = {
 			)
 		}
 
-		<h2 class="mt-16 font-serif text-2xl font-bold">{t("blog.categorias")}</h2>
-		<div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+		<h2 class="revelar mt-16 font-serif text-2xl font-bold">
+			{t("blog.categorias")}
+		</h2>
+		<div class="revelar-grupo mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{
 				areas.map((area) => {
 					const n = conteo[area.id] ?? 0;
@@ -75,11 +79,19 @@ const esquemaBlog = {
 							href={vacia ? undefined : localizedUrl(`/blog/${area.id}`, locale)}
 							aria-disabled={vacia ? "true" : undefined}
 							class:list={[
-								"border-border bg-card group rounded-xl border p-5 transition-colors",
-								vacia ? "pointer-events-none opacity-60" : "hover:border-primary/40",
+								"border-border bg-card group relative rounded-xl border p-5",
+								vacia
+									? "pointer-events-none opacity-60"
+									: "hover:border-primary/40 elevable",
 							]}
 						>
-							<span class="bg-secondary text-secondary-foreground mb-3 inline-flex size-10 items-center justify-center rounded-lg">
+							<span
+								class:list={[
+									"bg-secondary text-secondary-foreground color-animado mb-3 inline-flex size-10 items-center justify-center rounded-lg",
+									!vacia &&
+										"group-hover:bg-primary group-hover:text-primary-foreground",
+								]}
+							>
 								<Icon name={AREAS[area.id].icono} size={20} />
 							</span>
 							<h3 class="group-hover:text-primary font-semibold transition-colors">
@@ -90,9 +102,18 @@ const esquemaBlog = {
 								{vacia
 									? t("common.proximamente")
 									: n === 1
-										? "1 publicación"
-										: `${n} publicaciones`}
+										? t("blog.publicacion")
+										: t("blog.publicaciones", { n })}
 							</p>
+
+							{/* An area with nothing in it isn't a link, so it gets no arrow. */}
+							{!vacia && (
+								<Icon
+									name="lucide:arrow-right"
+									size={16}
+									class="text-primary flecha-tarjeta absolute right-5 bottom-5"
+								/>
+							)}
 						</a>
 					);
 				})

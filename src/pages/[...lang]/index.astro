@@ -11,8 +11,7 @@ import { INICIO, SITIO } from "@/lib/sitio";
 import { areasOrdenadas } from "@/lib/taxonomia";
 import { esquemaNegocio, esquemaSitioWeb } from "@/lib/seo";
 import { getTarjetasPropiedades, getTarjetasVehiculos } from "@/lib/anuncios";
-import Destacados from "@/components/anuncios/Destacados.svelte";
-import AnimarAlScroll from "@/components/AnimarAlScroll.svelte";
+import Destacados from "@/components/anuncios/Destacados.astro";
 
 export const getStaticPaths = localePaths;
 
@@ -24,15 +23,11 @@ const areas = areasOrdenadas(locale);
 
 const destacadas: import("@/lib/anuncios-tipos").TarjetaAnuncio[] = [];
 if (INICIO.mostrarPropiedadesDestacadas) {
-	const propiedades = (await getTarjetasPropiedades(locale)).filter(
-		(p) => p.destacado,
-	);
+	const propiedades = (await getTarjetasPropiedades(locale)).filter((p) => p.destacado);
 	destacadas.push(...propiedades.slice(0, INICIO.maxDestacados));
 }
 if (INICIO.mostrarVehiculosDestacados) {
-	const vehiculos = (await getTarjetasVehiculos(locale)).filter(
-		(v) => v.destacado,
-	);
+	const vehiculos = (await getTarjetasVehiculos(locale)).filter((v) => v.destacado);
 	destacadas.push(...vehiculos.slice(0, INICIO.maxDestacados));
 }
 // Sort by explicit order, then keep a stable mix.
@@ -72,53 +67,71 @@ const destacados = destacadas
 	{
 		INICIO.propuestas.length > 0 && (
 			<section class="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
-				<AnimarAlScroll selector=".scroll-animable" stagger={0.1} client:load>
-					<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-						{INICIO.propuestas.map((p) => (
-							<Card.Root class="scroll-animable">
-								<Card.Header>
-									<span class="bg-secondary text-secondary-foreground mb-2 inline-flex size-11 items-center justify-center rounded-xl">
-										<Icon name={p.icono} size={22} />
-									</span>
-									<Card.Title>{p.titulo}</Card.Title>
-									<Card.Description>{p.descripcion}</Card.Description>
-								</Card.Header>
-							</Card.Root>
-						))}
-					</div>
-				</AnimarAlScroll>
+				<div class="revelar-grupo grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+					{INICIO.propuestas.map((p) => (
+						<Card.Root>
+							<Card.Header>
+								<span class="bg-secondary text-secondary-foreground mb-2 inline-flex size-11 items-center justify-center rounded-xl">
+									<Icon name={p.icono} size={22} />
+								</span>
+								<Card.Title>{p.titulo}</Card.Title>
+								<Card.Description>{p.descripcion}</Card.Description>
+							</Card.Header>
+						</Card.Root>
+					))}
+				</div>
 			</section>
 		)
 	}
 
 	<section class="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
-		<AnimarAlScroll selector=".scroll-animable" stagger={0.05} start="top 82%" client:load>
-			<div class="scroll-animable mb-8">
+		<div class="revelar mb-8 flex flex-wrap items-end justify-between gap-4">
+			<div>
 				<h2 class="font-serif text-3xl font-bold tracking-tight">
 					{t("home.seccionServicios")}
 				</h2>
 				<p class="text-muted-foreground mt-2">{t("home.seccionServiciosTexto")}</p>
 			</div>
+			<a
+				href={localizedUrl("/servicios", locale)}
+				class="border-border bg-card hover:border-primary/40 hover:text-primary group elevable inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium"
+			>
+				{t("home.verTodasLasAreas")}
+				<Icon name="lucide:arrow-right" size={15} class="flecha-desliza" />
+			</a>
+		</div>
 
-			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-				{
-					areas.map((area) => (
-						<a
-							href={localizedUrl(`/servicios/${area.id}`, locale)}
-							class="scroll-animable border-border bg-card hover:border-primary/40 group elevable rounded-xl border p-5"
+		<div class="revelar-grupo grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+			{
+				areas.map((area) => (
+					<a
+						href={localizedUrl(`/servicios/${area.id}`, locale)}
+						class="border-border bg-card hover:border-primary/40 group elevable relative rounded-xl border p-5"
+					>
+						{/*
+						  Shared name with the same tile on the service page: the
+						  browser morphs one into the other during the view
+						  transition instead of cross-fading the whole page.
+						*/}
+						<span
+							transition:name={`area-icono-${area.id}`}
+							class="bg-secondary text-secondary-foreground group-hover:bg-primary group-hover:text-primary-foreground color-animado mb-3 inline-flex size-10 items-center justify-center rounded-lg"
 						>
-							<span class="bg-secondary text-secondary-foreground mb-3 inline-flex size-10 items-center justify-center rounded-lg">
-								<Icon name={area.icono} size={20} />
-							</span>
-							<h3 class="group-hover:text-primary font-semibold transition-colors">
-								{area.titulo}
-							</h3>
-							<p class="text-muted-foreground mt-1 text-sm">{area.resumen}</p>
-						</a>
-					))
-				}
-			</div>
-		</AnimarAlScroll>
+							<Icon name={area.icono} size={20} />
+						</span>
+						<h3 class="group-hover:text-primary font-semibold transition-colors">
+							{area.titulo}
+						</h3>
+						<p class="text-muted-foreground mt-1 text-sm">{area.resumen}</p>
+						<Icon
+							name="lucide:arrow-right"
+							size={16}
+							class="text-primary flecha-tarjeta absolute right-4 bottom-4"
+						/>
+					</a>
+				))
+			}
+		</div>
 	</section>
 
 	{
@@ -135,7 +148,6 @@ const destacados = destacadas
 					sinFoto: t("common.sinFoto"),
 					consultarPrecio: t("propiedades.consultarPrecio"),
 				}}
-				client:load
 			/>
 		)
 	}

@@ -111,7 +111,8 @@ const esquemaAnuncio = {
 	noindex={d.seo.noindex || d.borrador}
 	esquemas={[esquemaAnuncio, esquemaMigas(migas, site)]}
 >
-	<article class="mx-auto max-w-5xl px-4 py-12 sm:px-6">
+	{/* pb-28 en teléfono deja lugar a la barra de acción fija de abajo. */}
+	<article class="mx-auto max-w-5xl px-4 pt-12 pb-28 sm:px-6 lg:pb-12">
 		<nav aria-label="Migas de pan" class="text-muted-foreground mb-6 text-sm">
 			<a href={localizedUrl("/vehiculos", locale)} class="hover:text-foreground">
 				{t("vehiculos.titulo")}
@@ -123,16 +124,25 @@ const esquemaAnuncio = {
 		{
 			d.borrador && (
 				<Badge variant="outline" class="mb-4">
-					Borrador
+					{t("common.borrador")}
 				</Badge>
 			)
 		}
 
-		<!-- Solo la principal es eager: es el LCP en un teléfono con datos móviles. -->
-		<section class="grid gap-2 md:grid-cols-4" aria-label={t("vehiculos.galeria")}>
+		{
+			/*
+		  Solo la principal es eager: es el LCP en un teléfono con datos
+		  móviles. Dos columnas ya en el teléfono, para que la galería no sean
+		  seis pantallas de scroll antes de las tarifas.
+		*/
+		}
+		<section
+			class="grid grid-cols-2 gap-2 md:grid-cols-4"
+			aria-label={t("vehiculos.galeria")}
+		>
 			{
 				portada && (
-					<figure class="overflow-hidden rounded-xl md:col-span-4">
+					<figure class="group col-span-2 overflow-hidden rounded-xl md:col-span-4">
 						<R2Image
 							src={portada.ruta}
 							alt={portada.alt}
@@ -141,19 +151,21 @@ const esquemaAnuncio = {
 							ratio="3 / 2"
 							loading="eager"
 							fetchpriority="high"
+							class="zoom-foto"
 						/>
 					</figure>
 				)
 			}
 			{
 				resto.map((f) => (
-					<figure class="overflow-hidden rounded-lg">
+					<figure class="group revelar overflow-hidden rounded-lg">
 						<R2Image
 							src={f.ruta}
 							alt={f.alt}
 							anchos={[240, 480]}
 							sizes="(min-width: 768px) 16rem, 45vw"
 							ratio="4 / 3"
+							class="zoom-foto"
 						/>
 					</figure>
 				))
@@ -181,12 +193,12 @@ const esquemaAnuncio = {
 				</h1>
 				<p class="text-muted-foreground mt-2">{d.marca} {d.modelo}</p>
 
-				<section class="mt-8">
+				<section class="revelar mt-8">
 					<h2 class="font-semibold">{t("vehiculos.fichaTecnica")}</h2>
-					<dl class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+					<dl class="revelar-grupo mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
 						{
 							ficha.map((x) => (
-								<div class="border-border bg-card flex items-center gap-2 rounded-lg border p-3">
+								<div class="border-border bg-card elevable flex items-center gap-2 rounded-lg border p-3">
 									<Icon name={x.icono} size={18} class="text-muted-foreground" />
 									<div class="min-w-0">
 										<dt class="truncate text-sm">{x.etiqueta}</dt>
@@ -198,14 +210,14 @@ const esquemaAnuncio = {
 					</dl>
 				</section>
 
-				<section class="mt-8">
+				<section class="revelar mt-8">
 					<h2 class="font-semibold">{t("vehiculos.titulo")}</h2>
 					<div class="text-muted-foreground mt-3 space-y-3 text-pretty">
 						{d.descripcion.split("\n\n").map((parrafo) => <p>{parrafo}</p>)}
 					</div>
 				</section>
 
-				<section class="mt-8">
+				<section class="revelar mt-8">
 					<h2 class="font-semibold">{t("vehiculos.requisitos")}</h2>
 					<ul class="text-muted-foreground mt-3 space-y-1.5 text-sm">
 						{
@@ -274,4 +286,38 @@ const esquemaAnuncio = {
 			</aside>
 		</div>
 	</article>
+
+	{
+		/*
+	  Barra de acción del teléfono. En pantalla angosta las tarifas y el botón
+	  de reserva viven en una columna que cae DESPUÉS de las fotos, la ficha
+	  técnica, la descripción y los requisitos: lo que la persona vino a
+	  buscar era lo último que alcanzaba. En pantalla ancha desaparece,
+	  porque ahí la columna ya va pegada al viewport.
+	*/
+	}
+	<div
+		class="barra-accion border-border bg-background/95 fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-3 border-t px-4 pt-3 backdrop-blur lg:hidden"
+	>
+		<div class="min-w-0">
+			<p class="truncate font-bold">
+				{formatearPrecio(d.tarifaDiaria, locale)}
+				<span class="text-muted-foreground text-sm font-normal">
+					{t("vehiculos.porDia")}
+				</span>
+			</p>
+			<p class="text-muted-foreground truncate text-xs">
+				{t("vehiculos.codigo")}: <span class="font-mono">{d.referencia}</span>
+			</p>
+		</div>
+
+		<Button
+			href={whatsappUrl(mensaje)}
+			target="_blank"
+			rel="noopener noreferrer"
+			class="shrink-0"
+		>
+			{t("vehiculos.reservar")}
+		</Button>
+	</div>
 </BaseLayout>

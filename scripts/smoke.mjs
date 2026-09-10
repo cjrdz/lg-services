@@ -151,11 +151,28 @@ for (const ruta of RUTAS) {
 	  broken while every other check passed.
 	*/
 	const invisibles = await pagina.evaluate(() => {
-		const sospechosos = [...document.querySelectorAll("main .aparece, main h1")];
-		return sospechosos.filter((el) => {
+		const oculto = (el) => {
 			const e = getComputedStyle(el);
 			return e.opacity === "0" || e.visibility === "hidden" || e.display === "none";
-		}).length;
+		};
+
+		const sospechosos = [...document.querySelectorAll("main .aparece, main h1")];
+
+		/*
+		  Scroll reveals (.revelar) are legitimately transparent while they're
+		  still below the fold — that's the whole point — so only the ones
+		  already inside the viewport count. If `animation-timeline: view()`
+		  ever regressed, or the reduced-motion override stopped applying,
+		  this is what would catch it: no console error, just a blank page.
+		*/
+		const enPantalla = [
+			...document.querySelectorAll("main .revelar, main .revelar-grupo > *"),
+		].filter((el) => {
+			const r = el.getBoundingClientRect();
+			return r.bottom > 0 && r.top < window.innerHeight && r.height > 0;
+		});
+
+		return [...sospechosos, ...enPantalla].filter(oculto).length;
 	});
 
 	// An <img src=""> makes the browser re-request the page itself.

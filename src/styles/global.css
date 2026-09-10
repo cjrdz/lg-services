@@ -226,8 +226,44 @@
 		}
 	}
 
-	/* Short stagger for lists: four steps then it caps. Any more and it
-	   turns into a wait. */
+	/*
+	  Color transition on the site's own timing. Tailwind's
+	  `transition-colors` would work, but its duration is Tailwind's default,
+	  not one of our tokens — and on an element that also carries `.elevable`
+	  it wins the cascade and breaks the lift (see the note there).
+	*/
+	.color-animado {
+		transition:
+			color var(--duracion-rapida) var(--curva-suave),
+			background-color var(--duracion-rapida) var(--curva-suave),
+			border-color var(--duracion-rapida) var(--curva-suave);
+	}
+
+	/*
+	  Short stagger for lists: four steps then it caps. Any more and it
+	  turns into a wait.
+
+	  The children carry the transition themselves. They used to inherit
+	  nothing — the pages put `.aparece .aparece-escalonado` together on the
+	  CONTAINER, which faded the grid as one block and left every
+	  transition-delay below with no property to delay. The stagger was
+	  written but never ran.
+	*/
+	.aparece-escalonado > * {
+		opacity: 1;
+		translate: 0 0;
+		transition:
+			opacity var(--duracion-normal) var(--curva-salida),
+			translate var(--duracion-normal) var(--curva-salida);
+	}
+
+	@starting-style {
+		.aparece-escalonado > * {
+			opacity: 0;
+			translate: 0 0.5rem;
+		}
+	}
+
 	.aparece-escalonado > *:nth-child(1) {
 		transition-delay: 0ms;
 	}
@@ -302,11 +338,52 @@
 	}
 
 	/*
+	  Hero backdrop: two very soft brand-colored lights behind the content.
+
+	  Purely decorative, so it lives on an aria-hidden element and is taken
+	  out of the flow — the hero's layout is identical with it removed. It
+	  exists because the hero is a short text column next to a portrait, and
+	  on a wide screen the rest of the band read as an empty white field.
+
+	  The element is translated by HeroInteracciones as the pointer moves
+	  (opposite to the portrait, so the two read as different depths). With
+	  no pointer — a phone — it just sits still.
+	*/
+	.hero-aura {
+		background:
+			radial-gradient(
+				34rem 24rem at 62% 32%,
+				color-mix(in oklch, var(--primary) 16%, transparent),
+				transparent 68%
+			),
+			radial-gradient(
+				28rem 20rem at 18% 78%,
+				color-mix(in oklch, var(--accent) 12%, transparent),
+				transparent 70%
+			);
+		opacity: 1;
+		transition: opacity 1.2s var(--curva-suave);
+	}
+
+	@starting-style {
+		.hero-aura {
+			opacity: 0;
+		}
+	}
+
+	/*
 	  Hero primary CTA: a soft backlight pulse using the brand color.
-	  CSS-only, smooth, and pauses for reduced-motion users.
+
+	  Finite on purpose — three pulses, about seven seconds, then it settles
+	  into the resting shadow. An infinite glow is the one thing on the page
+	  that never stops moving, and on a lawyer's site that reads as an ad.
+	  The resting shadow matches the 0% keyframe so the end isn't a jump.
 	*/
 	.cta-backlight {
-		animation: cta-pulso 2.4s ease-in-out infinite;
+		box-shadow:
+			0 0 0 0 color-mix(in oklch, var(--primary) 35%, transparent),
+			0 4px 14px -6px color-mix(in oklch, var(--primary) 20%, transparent);
+		animation: cta-pulso 2.4s var(--curva-suave) 3;
 	}
 
 	@keyframes cta-pulso {
@@ -320,6 +397,57 @@
 			box-shadow:
 				0 0 28px -4px color-mix(in oklch, var(--primary) 55%, transparent),
 				0 6px 20px -6px color-mix(in oklch, var(--primary) 30%, transparent);
+		}
+	}
+
+	/*
+	  Affordance arrow for cards that are links. Hidden until the pointer is
+	  on the card — in a grid of seven, seven permanent arrows are clutter,
+	  but with none the cards don't look clickable at all. Also shows on
+	  keyboard focus, which is when it matters most.
+	*/
+	.flecha-tarjeta {
+		opacity: 0;
+		translate: -0.25rem 0;
+		transition:
+			opacity var(--duracion-rapida) var(--curva-suave),
+			translate var(--duracion-rapida) var(--curva-suave);
+	}
+
+	/*
+	  `focus-within` as well as `focus-visible`: on the listing cards the
+	  focusable element is the <a> INSIDE the card (it covers the card with
+	  `after:inset-0`), so the group itself never receives focus.
+	*/
+	.group:focus-visible .flecha-tarjeta,
+	.group:focus-within .flecha-tarjeta {
+		opacity: 1;
+		translate: 0 0;
+	}
+
+	@media (hover: hover) {
+		.group:hover .flecha-tarjeta {
+			opacity: 1;
+			translate: 0 0;
+		}
+	}
+
+	/*
+	  Same idea for inline links, where the arrow has to stay visible: making
+	  it appear on hover would change the button's width and shift the row.
+	  It only nudges forward.
+	*/
+	.flecha-desliza {
+		transition: translate var(--duracion-rapida) var(--curva-suave);
+	}
+
+	.group:focus-visible .flecha-desliza {
+		translate: 0.125rem 0;
+	}
+
+	@media (hover: hover) {
+		.group:hover .flecha-desliza {
+			translate: 0.125rem 0;
 		}
 	}
 
@@ -338,24 +466,99 @@
 	}
 
 	/*
-	  Scroll-driven card reveals. Hidden before GSAP's ScrollTrigger takes
-	  over, so cards don't flash visible for a moment when entering the viewport.
-	  No-JS users keep the content visible.
+	  Scroll reveal, no JavaScript.
+
+	  `animation-timeline: view()` hands the animation's progress to the
+	  browser: it advances as the element crosses the viewport, on the
+	  compositor, with no observer and no island. The home used to mount two
+	  GSAP islands for exactly this.
+
+	  It also removes a failure mode. The old rule hid the cards with
+	  `.js .scroll-animable { opacity: 0 }` and trusted GSAP to bring them
+	  back; if that chunk failed to download, the page stayed blank-ish with
+	  no error. Here the hidden state lives in the keyframe, so a browser
+	  without scroll-driven animations never hides anything — the @supports
+	  guard wraps everything, including the `from` state.
+
+	  Animates `transform`, NOT `translate`: `.elevable` owns `translate` for
+	  its hover lift, and a filled animation outranks a plain declaration —
+	  animating the same property here would kill the hover on every card.
 	*/
-	.scroll-animable {
-		opacity: 1;
-		transform: none;
+	@supports (animation-timeline: view()) {
+		.revelar,
+		.revelar-grupo > * {
+			animation: revelar-entrada linear both;
+			animation-timeline: view();
+			/*
+			  `entry` spans from "the element's top edge reaches the bottom of
+			  the viewport" to "the element is fully inside". Ending at 60%
+			  means it has settled while still coming in, instead of finishing
+			  only once it's well up the screen.
+			*/
+			animation-range: entry calc(5% + var(--revelar-retraso, 0%)) entry
+				calc(60% + var(--revelar-retraso, 0%));
+		}
+
+		/*
+		  Diagonal stagger for grids. A scroll-driven animation has no clock,
+		  so `animation-delay` does nothing; the offset goes into the range
+		  instead and each column starts a little further along the scroll.
+		*/
+		.revelar-grupo > *:nth-child(3n + 2) {
+			--revelar-retraso: 6%;
+		}
+
+		.revelar-grupo > *:nth-child(3n) {
+			--revelar-retraso: 12%;
+		}
+
+		@keyframes revelar-entrada {
+			from {
+				opacity: 0;
+				transform: translateY(1.25rem);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
 	}
 
-	.js .scroll-animable {
-		opacity: 0;
-		transform: translateY(1.5rem);
-	}
+	/*
+	  Reading progress on an article. Same idea as `.revelar`, other timeline:
+	  `scroll()` follows the document's scroll position from start to end
+	  instead of one element crossing the viewport. The bar is CSS all the way
+	  down — no listener, no rAF, no layout read on every scroll event.
 
-	@media (prefers-reduced-motion: reduce) {
-		.js .scroll-animable {
-			opacity: 1;
-			transform: none;
+	  The whole thing lives inside @supports, so a browser without
+	  scroll-driven animations gets no bar at all rather than one stuck at
+	  zero.
+	*/
+	@supports (animation-timeline: scroll()) {
+		.barra-progreso {
+			transform-origin: 0 50%;
+			animation: progreso-lectura linear both;
+			animation-timeline: scroll(root block);
+		}
+
+		@keyframes progreso-lectura {
+			from {
+				transform: scaleX(0);
+			}
+			to {
+				transform: scaleX(1);
+			}
+		}
+
+		/*
+		  A bar that only means anything while it moves. With motion turned
+		  off it would sit at zero width pretending to be a rule across the
+		  top, so it goes away entirely.
+		*/
+		@media (prefers-reduced-motion: reduce) {
+			:root[data-motion="sistema"] .barra-progreso {
+				display: none;
+			}
 		}
 	}
 
@@ -368,21 +571,99 @@
 	}
 
 	/*
+	  Listing photo, zoomed slightly on hover.
+
+	  The zoom goes on the <img> and the clipping on the card, so the frame
+	  never moves: what moves is what's inside it. `scale` and not `transform`
+	  for the same reason as the scroll reveal — GSAP Flip writes `transform`
+	  on these cards while it animates the grid.
+	*/
+	.zoom-foto {
+		scale: 1;
+		transition: scale var(--duracion-lenta) var(--curva-suave);
+	}
+
+	@media (hover: hover) {
+		.group:hover .zoom-foto {
+			scale: 1.04;
+		}
+	}
+
+	/*
+	  Filter panel, collapsible on a phone.
+
+	  The 0fr → 1fr grid row animates the height without measuring anything in
+	  JS (same trick as the FAQ accordion). Above the listing breakpoint the
+	  panel is simply always open and the toggle is hidden: a sidebar with
+	  room to spare has nothing to collapse.
+
+	  Default open so it works with no JavaScript; the island closes it on
+	  mount. Otherwise a phone with a failed hydration would be left with
+	  filters it can't open.
+	*/
+	.panel-plegable {
+		display: grid;
+		grid-template-rows: 1fr;
+		transition: grid-template-rows var(--duracion-normal) var(--curva-salida);
+	}
+
+	.panel-plegable > * {
+		overflow: hidden;
+	}
+
+	@media (width < 64rem) {
+		.js .panel-plegable[data-abierto="false"] {
+			grid-template-rows: 0fr;
+		}
+	}
+
+	/*
+	  Active-filter chips. They appear as the person filters, so they animate
+	  in on their own — @starting-style needs no observer and no class added
+	  from script.
+	*/
+	.chip-filtro {
+		opacity: 1;
+		scale: 1;
+		transition:
+			opacity var(--duracion-rapida) var(--curva-salida),
+			scale var(--duracion-rapida) var(--curva-salida);
+	}
+
+	@starting-style {
+		.chip-filtro {
+			opacity: 0;
+			scale: 0.9;
+		}
+	}
+
+	/*
+	  Sticky action bar on a phone: price on the left, WhatsApp on the right.
+
+	  Only the safe-area padding lives here — the gesture bar on a modern
+	  phone would sit on top of the button otherwise. Hiding it on wide
+	  screens is done with Tailwind's `lg:hidden` on the element, NOT from
+	  this layer: `display` here would lose to the `flex` utility, the same
+	  cascade trap documented on `.elevable`.
+	*/
+	.barra-accion {
+		padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+	}
+
+	/*
 	  Form feedback: success/error messages and inline field errors.
 	  Runs once when the element appears; reduced motion keeps it visible.
 	*/
 	.mensaje-animado {
 		opacity: 0;
 		transform: translateY(0.5rem);
-		animation: mensaje-entrar var(--duracion-normal) var(--curva-salida)
-			forwards;
+		animation: mensaje-entrar var(--duracion-normal) var(--curva-salida) forwards;
 	}
 
 	.error-animado {
 		opacity: 0;
 		transform: translateX(-0.25rem);
-		animation: error-entrar var(--duracion-rapida) var(--curva-salida)
-			forwards;
+		animation: error-entrar var(--duracion-rapida) var(--curva-salida) forwards;
 	}
 
 	@keyframes mensaje-entrar {
@@ -473,13 +754,47 @@
 	}
 
 	/* No motion, but the content still has to end up visible. */
-	:root[data-motion="sistema"] .aparece {
+	:root[data-motion="sistema"] .aparece,
+	:root[data-motion="sistema"] .aparece-escalonado > * {
 		opacity: 1 !important;
 		translate: none !important;
 	}
 
+	/*
+	  Scroll reveals need `animation: none`, not a shortened duration: a
+	  scroll-driven animation takes its progress from the scroll position,
+	  so the blanket `animation-duration: 0.01ms` above doesn't touch it and
+	  the content would stay faded out.
+	*/
+	:root[data-motion="sistema"] .revelar,
+	:root[data-motion="sistema"] .revelar-grupo > * {
+		animation: none !important;
+		opacity: 1 !important;
+		transform: none !important;
+	}
+
+	/* Decoration only: no reason to fade it in. */
+	:root[data-motion="sistema"] .hero-aura {
+		transition: none !important;
+		opacity: 1 !important;
+	}
+
 	:root[data-motion="sistema"] .js .acordeon-contenido {
 		grid-template-rows: 1fr !important;
+		transition: none !important;
+	}
+
+	/*
+	  The panel still has to open and close — it's a control, not decoration.
+	  What goes away is the animation between the two states.
+	*/
+	:root[data-motion="sistema"] .panel-plegable {
+		transition: none !important;
+	}
+
+	:root[data-motion="sistema"] .chip-filtro {
+		opacity: 1 !important;
+		scale: none !important;
 		transition: none !important;
 	}
 }

@@ -72,7 +72,15 @@ const mensaje = t("servicios.consultar", { area: d.titulo });
 			<span class="text-foreground">{d.titulo}</span>
 		</nav>
 
+		{
+			/*
+		  Same transition name as the area's tile on the home page and on the
+		  services index, so arriving here morphs that small tile into this
+		  big one instead of cross-fading the page.
+		*/
+		}
 		<span
+			transition:name={`area-icono-${area}`}
 			class="bg-secondary text-secondary-foreground mb-5 inline-flex size-14 items-center justify-center rounded-2xl"
 		>
 			<Icon name={AREAS[area].icono} size={28} />

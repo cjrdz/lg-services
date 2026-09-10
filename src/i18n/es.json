@@ -35,13 +35,15 @@
 		"publicado": "Publicado",
 		"actualizado": "Actualizado",
 		"minutosLectura": "{n} min de lectura",
-		"sinFoto": "Sin foto"
+		"sinFoto": "Sin foto",
+		"borrador": "Borrador"
 	},
 	"home": {
 		"heroCta": "Agendar consulta",
 		"heroCtaSecundario": "Ver servicios",
 		"seccionServicios": "Áreas de práctica",
 		"seccionServiciosTexto": "Asesoría legal en las áreas que más se necesitan en El Salvador.",
+		"verTodasLasAreas": "Ver todas las áreas",
 		"seccionPropiedades": "Propiedades destacadas",
 		"seccionVehiculos": "Vehículos disponibles",
 		"seccionBlog": "Últimas publicaciones",
@@ -125,6 +127,12 @@
 		"aplicar": "Aplicar",
 		"buscar": "Buscar",
 		"buscarPlaceholder": "Casa en Santa Tecla, terreno en La Libertad…",
+		"buscarPlaceholderVehiculos": "Toyota, SUV, automática…",
+		"ver": "Filtros",
+		"ocultar": "Ocultar filtros",
+		"quitar": "Quitar el filtro {filtro}",
+		"activo": "1 filtro activo",
+		"activos": "{n} filtros activos",
 		"operacion": "Operación",
 		"tipo": "Tipo",
 		"departamento": "Departamento",
@@ -155,7 +163,13 @@
 		"enArea": "Publicaciones en {area}",
 		"vacio": "Aún no hay publicaciones",
 		"vacioAyuda": "Estamos preparando contenido. Volvé pronto.",
-		"porAutor": "Por {autor}"
+		"porAutor": "Por {autor}",
+		"publicacion": "1 publicación",
+		"publicaciones": "{n} publicaciones",
+		"verArea": "Ver todas",
+		"ctaTitulo": "¿Tenés una consulta sobre este tema?",
+		"ctaTexto": "Escribinos y te respondemos lo antes posible.",
+		"volverAlArea": "Más sobre {area}"
 	},
 	"contacto": {
 		"titulo": "Contacto",

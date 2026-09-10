@@ -84,17 +84,77 @@ en `src/styles/global.css` (`--duracion-*`, `--curva-*`). La escala es corta a
 propósito — en una interfaz sobria la animación confirma lo que pasó, no llama
 la atención sobre sí misma.
 
-| Qué                          | Cómo                                                                                                           |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Entre páginas                | `<ClientRouter />` + `::view-transition-*`: un fundido, sin desplazar la página                                |
-| Entrada de contenido         | clase `.aparece` con `@starting-style` — CSS puro, sin IntersectionObserver (lg-blog tenía uno por componente) |
-| Tarjetas al pasar el cursor  | clase `.elevable`, 2 px y una sombra, solo con `@media (hover: hover)`                                         |
-| Íconos que cambian de estado | `morphicons`                                                                                                   |
+| Qué                           | Cómo                                                                                                           |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Entre páginas                 | `<ClientRouter />` + `::view-transition-*`: un fundido, sin desplazar la página                                |
+| Elemento que se transforma    | `transition:name` compartido por las dos páginas (el ícono del área en la home y en `/servicios/<área>`)       |
+| Entrada de contenido          | clase `.aparece` con `@starting-style` — CSS puro, sin IntersectionObserver (lg-blog tenía uno por componente) |
+| Entrada escalonada            | `.aparece-escalonado` en el contenedor; los hijos animan solos, no hay que marcarlos                           |
+| Revelado al hacer scroll      | `.revelar` / `.revelar-grupo` — `animation-timeline: view()`, cero JS                                          |
+| Tarjetas al pasar el cursor   | clase `.elevable`, 2 px y una sombra, solo con `@media (hover: hover)`                                         |
+| Colores al pasar el cursor    | `.color-animado` en el hijo (nunca `transition-colors` sobre un `.elevable`)                                   |
+| Flecha de "esto es un enlace" | `.flecha-tarjeta` (aparece al pasar el cursor) o `.flecha-desliza` (siempre visible, se desplaza)              |
+| Foto de un anuncio            | `.zoom-foto` en el `<img>`, con el recorte en el contenedor: el marco no se mueve, se mueve lo de adentro      |
+| Panel que se pliega           | `.panel-plegable` + `data-abierto`, de `0fr` a `1fr` sin medir nada en JS                                      |
+| Chips de filtro aplicado      | `.chip-filtro`, entran solos con `@starting-style`                                                             |
+| Progreso de lectura           | `.barra-progreso` — `animation-timeline: scroll(root block)`, cero JS                                          |
+| Íconos que cambian de estado  | `morphicons`                                                                                                   |
+
+**El revelado al hacer scroll NO usa JavaScript.** `.revelar` (un elemento) y
+`.revelar-grupo` (una grilla: cada hijo entra solo, con un desfase por columna)
+usan `animation-timeline: view()`, así que el navegador adelanta la animación
+según la posición del scroll, en el compositor. La home montaba dos islas de
+GSAP para exactamente esto.
+
+También quita un modo de falla: la versión anterior escondía las tarjetas con
+`.js .scroll-animable { opacity: 0 }` y confiaba en que GSAP volviera a
+mostrarlas; si ese chunk no bajaba, la página quedaba en blanco y sin un solo
+error en consola. Ahora el estado oculto vive en el keyframe y todo está dentro
+de `@supports (animation-timeline: view())`, así que un navegador sin
+animaciones por scroll simplemente muestra el contenido.
+
+Dos detalles que no se pueden tocar sin romperlo:
+
+- Anima `transform`, **no** `translate`: `translate` es de `.elevable` para su
+  elevación al pasar el cursor, y una animación con `fill: both` le gana a una
+  declaración normal — animar la misma propiedad mataría el hover de cada tarjeta.
+- Con movimiento reducido hace falta `animation: none`, no una duración corta:
+  una animación guiada por el scroll no tiene reloj, así que el
+  `animation-duration: 0.01ms` general no la toca y el contenido se quedaría
+  transparente.
+
+`bun run smoke` verifica que las `.revelar` que están dentro de la pantalla sean
+visibles: es la clase de fallo que no tira ningún error de consola.
+
+La barra de progreso de los artículos usa la otra línea de tiempo,
+`scroll(root block)`, que sigue la posición del scroll del documento en vez de
+un elemento cruzando la pantalla. También va entera dentro de su `@supports`, y
+con movimiento reducido **desaparece**: una barra que solo significa algo
+mientras se mueve, quieta en cero, es una raya sin sentido arriba de la página.
+
+**Cuidado con `truncate` dentro de una grilla.** `truncate` implica
+`white-space: nowrap`, y ese ancho mínimo sube por toda la cadena de padres:
+un hijo de grilla tiene `min-width: auto` y no puede achicarse por debajo del
+ancho mínimo de su contenido. Una tarjeta del blog con el subtema recortado
+corría la página 83 px a la derecha en un teléfono. Hace falta `min-w-0` en el
+texto **y en la tarjeta**, no solo en uno de los dos.
 
 **No mezclar `.elevable` con `transition-colors`.** La utilidad de Tailwind
 declara su propio `transition-property` y gana (utilities pesa más que
 components), así que la elevación saltaba de golpe en vez de animarse. `.elevable`
 ya incluye los colores.
+
+Es la misma trampa que hace que una clase de `@layer components` **no pueda
+esconder** un elemento que lleva utilidades de Tailwind: un `display: none`
+ahí pierde contra `flex`. Por eso la barra de acción de las fichas se oculta
+con `lg:hidden` en el elemento y no desde `global.css` — verificado en el
+navegador, no deducido.
+
+**El listado de anuncios: dos sistemas de animación, uno a la vez.** La grilla
+sale con `.revelar-grupo`, así que la primera pasada por la lista se revela
+sola. En cuanto alguien filtra, la isla le saca la clase y GSAP Flip pasa a ser
+el dueño de la grilla. No pueden convivir: el revelado es una animación CSS con
+`fill: both`, y eso le gana al `transform` en línea que escribe Flip.
 
 **morphicons solo donde el cambio significa algo**: sol↔luna, menú↔cerrar,
 copiar↔visto, buscar↔limpiar, enviar↔enviado. No es decoración; si el ícono no

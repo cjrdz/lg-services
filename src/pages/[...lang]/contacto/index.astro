@@ -106,12 +106,16 @@ const tarjetas = [
 	<section class="mx-auto max-w-4xl px-4 py-16 sm:px-6">
 		<div class="grid items-center gap-8 sm:grid-cols-[1fr_auto]">
 			<div>
-				<h1 class="font-serif text-4xl font-bold tracking-tight">
+				<h1 class="aparece font-serif text-4xl font-bold tracking-tight">
 					{t("contacto.titulo")}
 				</h1>
-				<p class="text-muted-foreground mt-3 text-lg">{t("contacto.descripcion")}</p>
+				<p class="aparece text-muted-foreground mt-3 text-lg">
+					{t("contacto.descripcion")}
+				</p>
 			</div>
-			<div class="bg-muted w-40 overflow-hidden rounded-2xl sm:w-48">
+			<div
+				class="aparece border-border/60 bg-muted w-40 overflow-hidden rounded-2xl border shadow-lg sm:w-48"
+			>
 				<ImagenLocal
 					src="/src/assets/images/contact.jpg"
 					alt={`${SITIO.nombre}, ${SITIO.profesion.toLowerCase()}`}
@@ -123,15 +127,24 @@ const tarjetas = [
 			</div>
 		</div>
 
-		<div class="mt-10 grid gap-4 sm:grid-cols-2">
+		{
+			/*
+		  Las cuatro vías de contacto. Tres son enlaces y una es un dato: las
+		  que se pueden tocar se elevan, cambian de color y muestran la flecha;
+		  la dirección no, porque no lleva a ningún lado.
+		*/
+		}
+		<div class="revelar-grupo mt-10 grid gap-4 sm:grid-cols-2">
 			{
 				tarjetas.map((c) => {
 					const contenido = (
 						<>
-							<span class="bg-secondary text-secondary-foreground mb-3 inline-flex size-10 items-center justify-center rounded-lg">
+							<span class="bg-secondary text-secondary-foreground color-animado mb-3 inline-flex size-10 items-center justify-center rounded-lg group-hover:bg-primary group-hover:text-primary-foreground">
 								<Icon name={c.icono} size={20} />
 							</span>
-							<h2 class="text-sm font-semibold">{c.titulo}</h2>
+							<h2 class="group-hover:text-primary text-sm font-semibold transition-colors">
+								{c.titulo}
+							</h2>
 							<p class="text-muted-foreground mt-1 text-sm">{c.valor}</p>
 						</>
 					);
@@ -141,9 +154,14 @@ const tarjetas = [
 							href={c.href}
 							target={c.externo ? "_blank" : undefined}
 							rel={c.externo ? "noopener noreferrer" : undefined}
-							class="border-border bg-card hover:border-primary/40 rounded-xl border p-5 transition-colors"
+							class="border-border bg-card hover:border-primary/40 group elevable relative rounded-xl border p-5"
 						>
 							{contenido}
+							<Icon
+								name="lucide:arrow-right"
+								size={16}
+								class="text-primary flecha-tarjeta absolute right-5 bottom-5"
+							/>
 						</a>
 					) : (
 						<div class="border-border bg-card rounded-xl border p-5">{contenido}</div>
@@ -165,7 +183,14 @@ const tarjetas = [
 			</Card.Content>
 		</Card.Root>
 
-		<section class="mt-12">
+		{
+			/*
+		  El formulario dentro de una tarjeta, como todo lo demás de la página.
+		  Suelto sobre el fondo no se leía como una unidad: los campos
+		  flotaban y no quedaba claro dónde empezaba y dónde terminaba.
+		*/
+		}
+		<section class="revelar border-border bg-card mt-12 rounded-xl border p-6 sm:p-8">
 			<h2 class="font-serif text-2xl font-bold">{t("formulario.enviar")}</h2>
 
 			{
@@ -209,13 +234,17 @@ const tarjetas = [
 			</div>
 		</section>
 
-		<div class="mt-10">
-			<h2 class="text-lg font-semibold">{t("contacto.horario")}</h2>
+		<div class="revelar border-border bg-card mt-10 rounded-xl border p-6">
+			<h2 class="flex items-center gap-2 text-lg font-semibold">
+				<Icon name="lucide:clock" size={18} class="text-muted-foreground" />
+				{t("contacto.horario")}
+			</h2>
 			<ul class="text-muted-foreground mt-3 space-y-1">
 				{
 					CONTACTO.horario.map((h) => (
-						<li>
-							<span class="text-foreground font-medium">{h.dias}:</span> {h.horas}
+						<li class="flex flex-wrap justify-between gap-x-4 gap-y-0.5">
+							<span class="text-foreground font-medium">{h.dias}</span>
+							<span>{h.horas}</span>
 						</li>
 					))
 				}

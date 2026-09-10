@@ -1,0 +1,72 @@
+---
+import Icon from "@/components/Icon.astro";
+import TarjetaAnuncio from "@/components/anuncios/TarjetaAnuncio.svelte";
+import type { TarjetaAnuncio as TarjetaAnuncioTipo } from "@/lib/anuncios-tipos";
+
+/**
+ * Featured listings on the home page.
+ *
+ * This used to be a Svelte island whose only job was mounting GSAP to fade
+ * the cards in on scroll. `.revelar-grupo` does the same thing in CSS, so
+ * the section ships as static HTML — TarjetaAnuncio.svelte is rendered
+ * without a client directive, which Astro resolves at build time.
+ */
+interface Props {
+	tarjetas: TarjetaAnuncioTipo[];
+	textos: {
+		titulo: string;
+		descripcion: string;
+		verPropiedades: string;
+		verVehiculos: string;
+		etiquetaPropiedades: string;
+		etiquetaVehiculos: string;
+		sinFoto: string;
+		consultarPrecio: string;
+	};
+}
+
+const { tarjetas, textos }: Props = Astro.props;
+
+const enlaces = [
+	{ href: textos.verPropiedades, etiqueta: textos.etiquetaPropiedades },
+	{ href: textos.verVehiculos, etiqueta: textos.etiquetaVehiculos },
+];
+---
+
+<section class="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
+	<div class="revelar mb-8 flex flex-wrap items-end justify-between gap-4">
+		<div>
+			<h2 class="font-serif text-3xl font-bold tracking-tight">
+				{textos.titulo}
+			</h2>
+			<p class="text-muted-foreground mt-2 max-w-2xl">{textos.descripcion}</p>
+		</div>
+		<div class="flex flex-wrap gap-3">
+			{
+				enlaces.map((e) => (
+					<a
+						href={e.href}
+						class="border-border bg-card hover:border-primary/40 hover:text-primary group elevable inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium"
+					>
+						{e.etiqueta}
+						<Icon name="lucide:arrow-right" size={15} class="flecha-desliza" />
+					</a>
+				))
+			}
+		</div>
+	</div>
+
+	<div class="revelar-grupo grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+		{
+			tarjetas.map((t) => (
+				<TarjetaAnuncio
+					tarjeta={t}
+					textos={{
+						sinFoto: textos.sinFoto,
+						consultarPrecio: textos.consultarPrecio,
+					}}
+				/>
+			))
+		}
+	</div>
+</section>
