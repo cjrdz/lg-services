@@ -19,7 +19,7 @@ interface Props {
 	noindex?: boolean;
 	/** Structured data. Serialized as JSON-LD in the <head>. */
 	esquemas?: Array<Record<string, unknown> | null>;
-	/** Leaves the title as-is, without appending " | Lisbeth Gutiérrez". */
+	/** Leaves the title as-is, without prefixing "LG | ". */
 	tituloExacto?: boolean;
 	tipoOg?: "website" | "article";
 }
@@ -36,9 +36,9 @@ const {
 } = Astro.props;
 
 const t = useTranslations(locale);
-const site = Astro.site ?? new URL("https://lisbethgutierrez.com");
+const site = Astro.site ?? new URL("https://gutierrezgroup.blog");
 
-const tituloCompleto = tituloExacto ? titulo : `${titulo}${t("seo.sufijoTitulo")}`;
+const tituloCompleto = tituloExacto ? titulo : `${SITIO.nombre} | ${titulo}`;
 const urlCanonica = canonical(Astro.url.pathname, site);
 const { alts, xDefault } = hreflangs(Astro.url.pathname, site);
 const imagenOg = new URL(imagen ?? SITIO.ogImagen, site).href;

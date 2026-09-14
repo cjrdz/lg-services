@@ -1,6 +1,6 @@
 # lg-services
 
-Sitio de Lisbeth Gutiérrez (abogada, San Pedro Puxtla, Ahuachapán, El Salvador).
+Sitio de Lisbeth Gutiérrez (abogada, San Salvador, San Salvador, El Salvador).
 Tres verticales: **servicios legales**, **propiedades** (casas, apartamentos y
 terrenos) y **vehículos en alquiler**, más blog y contacto.
 
@@ -87,7 +87,7 @@ la atención sobre sí misma.
 | Qué                           | Cómo                                                                                                           |
 | ----------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | Entre páginas                 | `<ClientRouter />` + `::view-transition-*`: un fundido, sin desplazar la página                                |
-| Elemento que se transforma    | `transition:name` compartido por las dos páginas (el ícono del área en la home y en `/servicios/<área>`)       |
+| Elemento que se transforma    | `transition:name` compartido por las dos páginas (los íconos de área y de publicación; ver abajo)              |
 | Entrada de contenido          | clase `.aparece` con `@starting-style` — CSS puro, sin IntersectionObserver (lg-blog tenía uno por componente) |
 | Entrada escalonada            | `.aparece-escalonado` en el contenedor; los hijos animan solos, no hay que marcarlos                           |
 | Revelado al hacer scroll      | `.revelar` / `.revelar-grupo` — `animation-timeline: view()`, cero JS                                          |
@@ -99,6 +99,57 @@ la atención sobre sí misma.
 | Chips de filtro aplicado      | `.chip-filtro`, entran solos con `@starting-style`                                                             |
 | Progreso de lectura           | `.barra-progreso` — `animation-timeline: scroll(root block)`, cero JS                                          |
 | Íconos que cambian de estado  | `morphicons`                                                                                                   |
+
+**Los íconos que se transforman son tres cadenas, y no se cruzan.** Un
+`view-transition-name` tiene que ser único en la página: si dos elementos lo
+comparten, el navegador descarta la transición entera. Por eso cada recorrido
+tiene su propio prefijo:
+
+| Cadena         | Nombre                   | De dónde a dónde                                    |
+| -------------- | ------------------------ | --------------------------------------------------- |
+| Servicios      | `area-icono-<área>`      | home y `/servicios` → `/servicios/<área>`           |
+| Áreas del blog | `blog-area-icono-<área>` | `/blog` → `/blog/<área>`                            |
+| Publicaciones  | `entrada-icono-<slug>`   | tarjeta de `TarjetaEntrada` → cabecera del artículo |
+
+El de las publicaciones va por publicación y **no** por área: en una grilla
+puede haber dos entradas de la misma área — y en `/blog/<área>` están todas —
+así que un nombre por área serían duplicados garantizados. Lo arma
+`transicionEntrada()` en `src/lib/formato.ts`, que además cambia las barras del
+slug por guiones, porque el nombre es un `<custom-ident>` y `/` no es válido
+ahí.
+
+**El morph de esos íconos, sin CSS propio, se ve casi invisible.** El
+navegador cruza el ícono viejo y el nuevo con `mix-blend-mode: plus-lighter`
+por default — pensado para que dos formas que no coinciden no dejen una
+costura oscura, pero sobre una insignia de un solo color lo que hace es
+sumar luz: el ícono se ve lavado, casi blanco, durante toda la transición.
+Encima, la caja que de verdad cambia de tamaño y posición (el pseudo-elemento
+`group`) se queda en el default del navegador (0.25s `ease`), fuera de los
+tokens de este archivo. `global.css` lo arregla con
+`::view-transition-group(*)` / `::view-transition-old(*)` /
+`::view-transition-new(*)`, usando `(*)` porque `entrada-icono-<slug>` no se
+puede enumerar ahí — y un selector con nombre explícito, como
+`::view-transition-old(root)`, le gana a `(*)` sin importar el orden, así
+que no le toca nada al fundido de página.
+
+El `mix-blend-mode: normal` de esa regla necesita `!important`: el navegador
+aplica el `plus-lighter` con una animación de user-agent, y una animación le
+gana a una declaración de autor normal en la cascada — comprobado en el
+navegador, sin `!important` la regla compila pero no hace nada.
+
+**Esa misma regla usa `--curva-suave`, no `--curva-salida` — a propósito.**
+`--curva-salida` (`cubic-bezier(0.16, 1, 0.3, 1)`) es un ease-out muy
+pronunciado: casi todo el recorrido pasa en el primer tercio de la duración y
+el resto es solo asentarse. Le queda bien a algo que _aparece_ (`.aparece`,
+la página entrando), pero en una caja que cambia de tamaño **y** de posición
+a la vez, ese arranque brusco se ve como un salto en vez de un movimiento —
+el primer intento de este morph usaba esa curva con `--duracion-normal`
+(220ms) y se sentía "snappy" en vez de suave. `--curva-suave`
+(`cubic-bezier(0.4, 0, 0.2, 1)`, ease-in-out estándar) reparte el recorrido
+a lo largo de toda la duración, y con `--duracion-lenta` (380ms, la misma
+que ya usa el fundido de página) alcanza a leerse como una transformación,
+no un tic. La caja (`group`) y el cruce de íconos (`old`/`new`) comparten
+duración para que terminen juntos.
 
 **El revelado al hacer scroll NO usa JavaScript.** `.revelar` (un elemento) y
 `.revelar-grupo` (una grilla: cada hijo entra solo, con un desfase por columna)

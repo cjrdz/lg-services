@@ -22,7 +22,7 @@ export async function getStaticPaths() {
 
 const { vehiculo, locale } = Astro.props;
 const t = useTranslations(locale);
-const site = Astro.site ?? new URL("https://lisbethgutierrez.com");
+const site = Astro.site ?? new URL("https://gutierrezgroup.blog");
 
 const d = vehiculo.data;
 const portada = d.fotos[d.portada] ?? d.fotos[0];

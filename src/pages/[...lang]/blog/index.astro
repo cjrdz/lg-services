@@ -13,7 +13,7 @@ export const getStaticPaths = localePaths;
 
 const { locale } = Astro.props;
 const t = useTranslations(locale);
-const site = Astro.site ?? new URL("https://lisbethgutierrez.com");
+const site = Astro.site ?? new URL("https://gutierrezgroup.blog");
 
 const entradas = await getEntradas(locale);
 const recientes = entradas.slice(0, 6);
@@ -85,7 +85,15 @@ const esquemaBlog = {
 									: "hover:border-primary/40 elevable",
 							]}
 						>
+							{/*
+							  El mismo nombre que el ícono en la cabecera de esa área, así que
+							  entrar a ella transforma el ícono chico en el grande en vez de
+							  fundirlo. Namespace propio, aparte de `area-icono-*` (home y
+							  /servicios): son otro par, y dos elementos con el mismo nombre en
+							  una misma página anulan la transición entera.
+							*/}
 							<span
+								transition:name={`blog-area-icono-${area.id}`}
 								class:list={[
 									"bg-secondary text-secondary-foreground color-animado mb-3 inline-flex size-10 items-center justify-center rounded-lg",
 									!vacia &&

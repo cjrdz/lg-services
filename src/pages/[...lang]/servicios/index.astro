@@ -11,7 +11,7 @@ export const getStaticPaths = localePaths;
 
 const { locale } = Astro.props;
 const t = useTranslations(locale);
-const site = Astro.site ?? new URL("https://lisbethgutierrez.com");
+const site = Astro.site ?? new URL("https://gutierrezgroup.blog");
 
 const servicios = await getServicios(locale);
 const migas = migasDe(locale, [{ nombre: t("servicios.titulo") }]);

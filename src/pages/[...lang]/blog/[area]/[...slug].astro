@@ -5,8 +5,14 @@ import { useTranslations } from "@/i18n";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Icon from "@/components/Icon.astro";
 import { Badge } from "@/components/ui/badge";
-import { getEntradas, formatearFecha, slugDe, tiempoLectura } from "@/lib/contenido";
-import { areaTitulo } from "@/lib/taxonomia";
+import {
+	getEntradas,
+	formatearFecha,
+	slugDe,
+	tiempoLectura,
+	transicionEntrada,
+} from "@/lib/contenido";
+import { AREAS, areaTitulo } from "@/lib/taxonomia";
 import { esquemaArticulo, esquemaMigas, migasDe } from "@/lib/seo";
 import { whatsappUrl } from "@/lib/sitio";
 
@@ -28,7 +34,7 @@ export async function getStaticPaths() {
 
 const { entrada, locale } = Astro.props;
 const t = useTranslations(locale);
-const site = Astro.site ?? new URL("https://lisbethgutierrez.com");
+const site = Astro.site ?? new URL("https://gutierrezgroup.blog");
 
 const d = entrada.data;
 const { Content } = await render(entrada);
@@ -88,6 +94,19 @@ const minutos = tiempoLectura(entrada.body ?? "");
 				{areaTitulo(d.area, locale)}
 			</a>
 		</nav>
+
+		{
+			/*
+		  El otro extremo del morph de la tarjeta que trajo hasta acá, y el
+		  mismo cuadrito de área que ya tienen /blog/<área> y /servicios/<área>.
+		*/
+		}
+		<span
+			transition:name={transicionEntrada(entrada.id)}
+			class="bg-secondary text-secondary-foreground mb-4 inline-flex size-12 items-center justify-center rounded-xl"
+		>
+			<Icon name={AREAS[d.area].icono} size={24} />
+		</span>
 
 		{
 			d.borrador && (

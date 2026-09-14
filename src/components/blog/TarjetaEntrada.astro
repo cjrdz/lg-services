@@ -4,7 +4,13 @@ import { localizedUrl } from "@/i18n/routing";
 import { useTranslations } from "@/i18n";
 import Icon from "@/components/Icon.astro";
 import { Badge } from "@/components/ui/badge";
-import { formatearFecha, slugDe, tiempoLectura, type Entrada } from "@/lib/contenido";
+import {
+	formatearFecha,
+	slugDe,
+	tiempoLectura,
+	transicionEntrada,
+	type Entrada,
+} from "@/lib/contenido";
 import { AREAS, areaTitulo } from "@/lib/taxonomia";
 
 interface Props {
@@ -42,7 +48,14 @@ const minutos = tiempoLectura(entrada.body ?? "");
 	class="border-border bg-card hover:border-primary/40 group elevable relative flex min-w-0 flex-col rounded-xl border p-5"
 >
 	<div class="flex items-center gap-2">
+		{
+			/*
+		  El mismo nombre que el ícono de la cabecera del artículo: al abrirlo,
+		  este cuadrito se transforma en el grande en vez de fundirse.
+		*/
+		}
 		<span
+			transition:name={transicionEntrada(entrada.id)}
 			class="bg-secondary text-secondary-foreground group-hover:bg-primary group-hover:text-primary-foreground color-animado inline-flex size-8 shrink-0 items-center justify-center rounded-lg"
 		>
 			<Icon name={AREAS[d.area].icono} size={16} />

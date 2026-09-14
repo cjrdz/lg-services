@@ -16,7 +16,7 @@ export const getStaticPaths = localePaths;
 
 const { locale } = Astro.props;
 const t = useTranslations(locale);
-const site = Astro.site ?? new URL("https://lisbethgutierrez.com");
+const site = Astro.site ?? new URL("https://gutierrezgroup.blog");
 
 const tarjetas = await getTarjetasPropiedades(locale);
 const visibles = tarjetas.filter((x) => x.disponible);

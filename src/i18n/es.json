@@ -90,7 +90,7 @@
 		"verEnMapa": "Ver en el mapa"
 	},
 	"vehiculos": {
-		"titulo": "Alquiler de vehículos",
+		"titulo": "Vehículos",
 		"descripcion": "Vehículos en alquiler por día, semana o mes en El Salvador.",
 		"porDia": "por día",
 		"porSemana": "por semana",
@@ -202,9 +202,6 @@
 	},
 	"unidades": {
 		"usd": "US$"
-	},
-	"seo": {
-		"sufijoTitulo": " | Lisbeth Gutiérrez"
 	},
 	"errores": {
 		"404titulo": "Página no encontrada",

@@ -76,16 +76,6 @@ const inicioSchema = z.object({
 	heroImagenAlt: z.string().min(5),
 	heroCtaTexto: z.string().min(2),
 	heroCtaUrl: z.string().min(1),
-	propuestas: z
-		.array(
-			z.object({
-				icono: z.string().min(1),
-				titulo: z.string().min(3),
-				descripcion: z.string().min(20),
-			}),
-		)
-		.max(4)
-		.default([]),
 	mostrarPropiedadesDestacadas: z.boolean().default(true),
 	mostrarVehiculosDestacados: z.boolean().default(true),
 	maxDestacados: z.number().int().min(2).max(9).default(3),

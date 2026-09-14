@@ -20,6 +20,9 @@ const { editor } = Astro.locals;
      GitHub OAuth routes DON'T EXIST. The "Sign in with GitHub" button used
      to 404 at /api/keystatic/github/login.
    · There's also no R2 binding, so there'd be nowhere to upload photos.
+   · In production this route also sits behind Cloudflare Access (see
+     SETUP-CLOUDFLARE-ACCESS.md) — a separate edge-level gate, in front of
+     the GitHub login, that localhost never goes through either way.
 
   The studio is tested against the compiled worker: bun run build && bun run preview.
 */
@@ -57,6 +60,12 @@ const enDesarrollo = import.meta.env.DEV;
 					<li>
 						Tampoco hay <strong>bucket R2</strong>, así que no habría dónde subir las
 						fotos.
+					</li>
+					<li>
+						En producción, esta ruta además vive detrás de{" "}
+						<strong>Cloudflare Access</strong> (ver{" "}
+						<code class="bg-muted rounded px-1 py-0.5">SETUP-CLOUDFLARE-ACCESS.md</code>):
+						un candado aparte, delante del login de GitHub, que localhost nunca ve.
 					</li>
 				</ul>
 				<p class="mt-5 text-sm">Para probarlo de verdad, contra el worker compilado:</p>

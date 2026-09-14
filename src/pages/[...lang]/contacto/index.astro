@@ -26,7 +26,7 @@ export const prerender = false;
 
 const locale = resolveLocale(Astro.params.lang);
 const t = useTranslations(locale);
-const site = Astro.site ?? new URL("https://lisbethgutierrez.com");
+const site = Astro.site ?? new URL("https://gutierrezgroup.blog");
 
 const migas = migasDe(locale, [{ nombre: t("contacto.titulo") }]);
 

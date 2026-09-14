@@ -27,7 +27,7 @@ export async function getStaticPaths() {
 
 const { pagina, locale } = Astro.props;
 const t = useTranslations(locale);
-const site = Astro.site ?? new URL("https://lisbethgutierrez.com");
+const site = Astro.site ?? new URL("https://gutierrezgroup.blog");
 
 const d = pagina.data;
 const { Content } = await render(pagina);

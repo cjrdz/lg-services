@@ -1,5 +1,6 @@
 import { DEFAULT_LOCALE, type Locale } from "@/i18n/config";
 import { alternateUrls, localizedUrl, stripLocale } from "@/i18n/routing";
+import { departamentoNombre } from "./geo/el-salvador";
 import { CONTACTO, SITIO } from "./sitio";
 
 /**
@@ -41,7 +42,7 @@ export function esquemaNegocio(site: URL | string) {
 			"@type": "PostalAddress",
 			streetAddress: CONTACTO.direccion,
 			addressCountry: "SV",
-			addressRegion: "Ahuachapán",
+			addressRegion: departamentoNombre(CONTACTO.departamento),
 		},
 		areaServed: { "@type": "Country", name: "El Salvador" },
 		sameAs: Object.values(CONTACTO.redes).filter(Boolean),

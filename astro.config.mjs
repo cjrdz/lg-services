@@ -17,13 +17,11 @@ import { LOCALES, DEFAULT_LOCALE } from "./src/i18n/config.ts";
   The site's domain. Feeds the canonical URL, the sitemap, hreflang, and
   Open Graph images.
 
-  Until there's a custom domain, this needs to be Cloudflare's workers.dev
-  URL — otherwise those values point at someone else's domain: search
-  engines index it wrong, and sharing over WhatsApp shows no preview image.
-
-  Read from PUBLIC_SITE_URL (wrangler.jsonc) so this never needs editing.
+  Read from PUBLIC_SITE_URL (wrangler.jsonc) so this never needs editing;
+  the literal here is just the fallback for a plain `astro build`/`astro dev`
+  run that doesn't have that var set.
 */
-const SITE = process.env.PUBLIC_SITE_URL ?? "https://lisbethgutierrez.com";
+const SITE = process.env.PUBLIC_SITE_URL ?? "https://gutierrezgroup.blog";
 
 /*
   The Cloudflare adapter runs the dev server inside workerd, where Keystatic's

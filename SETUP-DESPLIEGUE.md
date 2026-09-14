@@ -1,18 +1,31 @@
-# Desplegar a Cloudflare (sin dominio propio)
+# Desplegar a Cloudflare
 
 El sitio ya funciona entero en local. Falta conectarlo a Cloudflare y a GitHub
 para que Lisbeth pueda publicar sola.
 
-Esta guía asume **todavía sin dominio**: se despliega a `*.workers.dev`, que es
-gratis y sirve para trabajar. En `SETUP-R2.md` está qué cambiar el día que
-compres el dominio.
+**Dominio: `gutierrezgroup.blog`, comprado en Porkbun.** `PUBLIC_SITE_URL` en
+`wrangler.jsonc` ya apunta ahí. Falta el lado de infraestructura, que no vive
+en el repo:
+
+1. Cloudflare → **Workers & Pages** → `lg-services` → **Settings** → **Domains
+   & Routes** → **Add** → Custom domain → `gutierrezgroup.blog`.
+2. Cloudflare te da los registros DNS a poner. Se cargan en **Porkbun** (el
+   dominio no necesita pasar a los nameservers de Cloudflare para esto: un
+   registro custom domain de Workers funciona con Porkbun como DNS, o podés
+   mover los nameservers a Cloudflare si preferís administrar el DNS ahí).
+3. Repetir para `www.gutierrezgroup.blog` si vas a servir ambos, o agregar una
+   redirección de `www` → apex (o al revés) en Cloudflare.
+
+Hasta que ese paso quede hecho, el Worker sigue respondiendo también en su URL
+de `*.workers.dev` — sirve para seguir probando mientras el DNS propaga.
 
 ---
 
 ## Orden
 
-1. Desplegar (para saber cuál es la URL)
-2. Fijar `PUBLIC_SITE_URL` con esa URL
+1. Desplegar (para tener un Worker en Cloudflare)
+2. Conectar `gutierrezgroup.blog` como dominio propio del Worker (Cloudflare +
+   DNS en Porkbun)
 3. Crear la GitHub App de Keystatic
 4. Configurar el correo del formulario
 5. R2 para las fotos → `SETUP-R2.md`
@@ -26,28 +39,21 @@ bunx wrangler login          # abre el navegador
 bun run deploy
 ```
 
-Al final imprime la URL. Va a verse así:
+Al final imprime la URL de `*.workers.dev`. Sirve para probar mientras el
+dominio propio no esté conectado todavía.
 
-```
-https://lg-services.<tu-subdominio>.workers.dev
-```
+## 2. Conectar el dominio propio
 
-Anotala: se usa en los pasos 2 y 3.
+`PUBLIC_SITE_URL` en `wrangler.jsonc` ya está en `https://gutierrezgroup.blog`
+— **no es cosmético**: de ahí salen la URL canónica, el sitemap, los hreflang y
+la imagen de Open Graph, así que hasta que el dominio responda de verdad, esos
+valores apuntan a algo que todavía no sirve la página (Google indexaría mal,
+WhatsApp no traería vista previa).
 
-## 2. Fijar la URL del sitio
-
-En `wrangler.jsonc`, reemplazá el marcador:
-
-```jsonc
-"PUBLIC_SITE_URL": "https://lg-services.<tu-subdominio>.workers.dev"
-```
-
-**No es cosmético.** De ahí salen la URL canónica, el sitemap, los hreflang y la
-imagen de Open Graph. Mientras diga `PENDIENTE-…`, esos valores apuntan a
-`lisbethgutierrez.com`, un dominio que todavía no es tuyo: Google indexaría mal
-y al compartir por WhatsApp la vista previa saldría sin imagen.
-
-Después: `bun run deploy` otra vez.
+Para que responda: seguir los tres pasos de arriba (Cloudflare → Domains &
+Routes → Add → `gutierrezgroup.blog`, y cargar los registros DNS que da
+Cloudflare en Porkbun). No hace falta volver a tocar `wrangler.jsonc` ni
+volver a desplegar solo por esto.
 
 ## 3. GitHub App para Keystatic
 
@@ -110,7 +116,8 @@ anterior sí fingía: mostraba "¡Mensaje enviado con éxito!" sin mandar nada.)
 
 Sin esto el formulario igual anda; el honeypot frena a los bots simples.
 
-1. Cloudflare → **Turnstile** → Add site → tu dominio de workers.dev
+1. Cloudflare → **Turnstile** → Add site → `gutierrezgroup.blog` (y tu URL de
+   `*.workers.dev` mientras el dominio propio no esté conectado)
 2. La clave pública va en `wrangler.jsonc`:
    ```jsonc
    "PUBLIC_TURNSTILE_SITE_KEY": "0x4AAA..."

@@ -719,6 +719,57 @@
 	animation: entrar var(--duracion-lenta) var(--curva-salida);
 }
 
+/*
+  Icon morphs (área en servicios y blog, ícono de una publicación): la caja
+  cambia de tamaño y posición, y el ícono adentro se cruza de una versión a
+  la otra.
+
+  Sin esto, dos cosas del navegador lo dejaban casi invisible:
+
+  - `mix-blend-mode: plus-lighter` es el default del navegador para el
+    cruce — sirve para que dos formas que no coinciden no dejen una costura
+    oscura, pero sobre una insignia de un solo color (bg-secondary/
+    bg-primary) lo que hace es sumar luz: el ícono se ve lavado, casi
+    blanco, durante el cruce entero.
+  - Astro fija esas 180ms con `EASE_IN_OUT_QUART` para el cruce, pero deja
+    la caja (el `group`, que es lo que de verdad se mueve y cambia de
+    tamaño) en el default del navegador — 0.25s `ease` — sin pasar por los
+    tokens de este archivo.
+
+  `(*)` porque los nombres de las publicaciones son uno por artículo
+  (`entrada-icono-<slug>`, ver `transicionEntrada()` en `src/lib/formato.ts`)
+  y no se pueden enumerar acá. Un selector con nombre explícito — como
+  `::view-transition-old(root)`, arriba — siempre le gana a `(*)` sin
+  importar el orden en el archivo, así que esto no le toca nada a la
+  transición de página.
+
+  El `!important` en `mix-blend-mode` no es decorativo: el navegador aplica
+  ese `plus-lighter` con una animación de UA (fill-mode `both`), y una
+  animación le gana a una declaración de autor normal en la cascada — sin
+  `!important` esta regla compila pero no hace nada, comprobado en el
+  navegador.
+
+  `--curva-suave`, no `--curva-salida`: esta última es un ease-out muy
+  pronunciado (`cubic-bezier(0.16, 1, 0.3, 1)`), pensada para un elemento que
+  *aparece* y a los 220ms ya recorrió casi todo el camino en los primeros
+  70-90ms — ahí se siente bien porque el resto es solo asentarse. Para una
+  caja que cambia de tamaño Y de posición a la vez, ese mismo arranque
+  brusco se lee como un salto, no como un movimiento. `--curva-suave`
+  reparte el recorrido a lo largo de toda la duración; la caja y el cruce de
+  íconos comparten duración para que terminen juntos.
+*/
+::view-transition-group(*) {
+	animation-duration: var(--duracion-lenta);
+	animation-timing-function: var(--curva-suave);
+}
+
+::view-transition-old(*),
+::view-transition-new(*) {
+	animation-duration: var(--duracion-lenta);
+	animation-timing-function: var(--curva-suave);
+	mix-blend-mode: normal !important;
+}
+
 @keyframes salir {
 	to {
 		opacity: 0;
@@ -750,6 +801,14 @@
 	/* No page fade: change happens directly. */
 	:root[data-motion="sistema"]::view-transition-old(root),
 	:root[data-motion="sistema"]::view-transition-new(root) {
+		animation: none !important;
+	}
+
+	/* Same for los íconos que se transforman: sin animación, la caja aparece
+	   directo en su tamaño y posición finales. */
+	:root[data-motion="sistema"]::view-transition-group(*),
+	:root[data-motion="sistema"]::view-transition-old(*),
+	:root[data-motion="sistema"]::view-transition-new(*) {
 		animation: none !important;
 	}
 

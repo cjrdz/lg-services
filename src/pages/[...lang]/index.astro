@@ -6,8 +6,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import Icon from "@/components/Icon.astro";
 import ImagenLocal from "@/components/ImagenLocal.astro";
 import Hero from "@/components/Hero.astro";
-import * as Card from "@/components/ui/card";
-import { INICIO, SITIO } from "@/lib/sitio";
+import { INICIO } from "@/lib/sitio";
 import { areasOrdenadas } from "@/lib/taxonomia";
 import { esquemaNegocio, esquemaSitioWeb } from "@/lib/seo";
 import { getTarjetasPropiedades, getTarjetasVehiculos } from "@/lib/anuncios";
@@ -17,7 +16,7 @@ export const getStaticPaths = localePaths;
 
 const { locale } = Astro.props;
 const t = useTranslations(locale);
-const site = Astro.site ?? new URL("https://lisbethgutierrez.com");
+const site = Astro.site ?? new URL("https://gutierrezgroup.blog");
 
 const areas = areasOrdenadas(locale);
 
@@ -38,9 +37,8 @@ const destacados = destacadas
 
 <BaseLayout
 	locale={locale}
-	titulo={SITIO.nombre}
+	titulo={t("nav.inicio")}
 	descripcion={t("sitio.descripcion")}
-	tituloExacto
 	esquemas={[esquemaNegocio(site), esquemaSitioWeb(site)]}
 >
 	<Hero
@@ -64,27 +62,7 @@ const destacados = destacadas
 		/>
 	</Hero>
 
-	{
-		INICIO.propuestas.length > 0 && (
-			<section class="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
-				<div class="revelar-grupo grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-					{INICIO.propuestas.map((p) => (
-						<Card.Root>
-							<Card.Header>
-								<span class="bg-secondary text-secondary-foreground mb-2 inline-flex size-11 items-center justify-center rounded-xl">
-									<Icon name={p.icono} size={22} />
-								</span>
-								<Card.Title>{p.titulo}</Card.Title>
-								<Card.Description>{p.descripcion}</Card.Description>
-							</Card.Header>
-						</Card.Root>
-					))}
-				</div>
-			</section>
-		)
-	}
-
-	<section class="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
+	<section class="mx-auto max-w-6xl px-4 pt-16 pb-20 sm:px-6">
 		<div class="revelar mb-8 flex flex-wrap items-end justify-between gap-4">
 			<div>
 				<h2 class="font-serif text-3xl font-bold tracking-tight">

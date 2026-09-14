@@ -13,6 +13,18 @@ export function slugDe(id: string): string {
 	return id.replace(/^[a-z]{2}\//, "");
 }
 
+/**
+ * Nombre de view transition del ícono de una entrada.
+ *
+ * Va por publicación y no por área a propósito: en una grilla puede haber
+ * dos publicaciones de la misma área, y dos elementos con el mismo nombre en
+ * una página anulan la transición entera. Las barras del slug se cambian por
+ * guiones porque el nombre es un <custom-ident> y "/" no es válido ahí.
+ */
+export function transicionEntrada(id: string): string {
+	return `entrada-icono-${slugDe(id).replace(/\//g, "-")}`;
+}
+
 /** Date in Salvadoran format: "12 de marzo de 2025". */
 export function formatearFecha(fecha: Date, locale: Locale = DEFAULT_LOCALE): string {
 	return new Intl.DateTimeFormat(locale === "es" ? "es-SV" : "en-US", {

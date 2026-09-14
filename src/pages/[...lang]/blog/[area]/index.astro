@@ -20,7 +20,7 @@ const { area, locale } = Astro.props as {
 };
 
 const t = useTranslations(locale);
-const site = Astro.site ?? new URL("https://lisbethgutierrez.com");
+const site = Astro.site ?? new URL("https://gutierrezgroup.blog");
 
 const copy = areaCopy(area, locale);
 const entradas = await getEntradasPorArea(area, locale);
@@ -70,7 +70,12 @@ const coleccion = {
 			<span class="text-foreground">{copy.titulo}</span>
 		</nav>
 
+		{
+			/* El otro extremo del morph: el mismo nombre que la tarjeta de esta
+			    área en /blog. */
+		}
 		<span
+			transition:name={`blog-area-icono-${area}`}
 			class="bg-secondary text-secondary-foreground mb-4 inline-flex size-12 items-center justify-center rounded-xl"
 		>
 			<Icon name={AREAS[area].icono} size={24} />

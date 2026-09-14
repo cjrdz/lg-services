@@ -1,7 +1,7 @@
 import type { APIContext } from "astro";
 
 export async function GET(context: APIContext) {
-	const site = context.site ?? new URL("https://lisbethgutierrez.com");
+	const site = context.site ?? new URL("https://gutierrezgroup.blog");
 
 	// /keystatic and /estudio are Lisbeth's tools, not public content.
 	const cuerpo = `User-agent: *

@@ -15,7 +15,7 @@ export async function GET(context: APIContext) {
 	return rss({
 		title: `${t("blog.titulo")} — ${SITIO.nombre}`,
 		description: t("blog.descripcion"),
-		site: context.site ?? "https://lisbethgutierrez.com",
+		site: context.site ?? "https://gutierrezgroup.blog",
 		customData: "<language>es-SV</language>",
 		items: entradas.map((e) => ({
 			title: e.data.titulo,

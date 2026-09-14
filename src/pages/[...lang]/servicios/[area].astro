@@ -24,7 +24,7 @@ const { area, locale } = Astro.props as {
 };
 
 const t = useTranslations(locale);
-const site = Astro.site ?? new URL("https://lisbethgutierrez.com");
+const site = Astro.site ?? new URL("https://gutierrezgroup.blog");
 
 const servicio = await getServicioPorArea(area, locale);
 if (!servicio) {

@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 // Se importa de formato.ts, no de contenido.ts: ese último importa
 // `astro:content`, un módulo virtual que solo existe dentro del build de Astro.
-import { formatearFecha, formatearPrecio, slugDe, tiempoLectura } from "@/lib/formato";
+import {
+	formatearFecha,
+	formatearPrecio,
+	slugDe,
+	tiempoLectura,
+	transicionEntrada,
+} from "@/lib/formato";
 import {
 	AREAS,
 	AREA_IDS,
@@ -35,6 +41,22 @@ describe("slugDe", () => {
 		// "sv" no es un locale del sitio, pero el patrón es el mismo; se documenta
 		// el comportamiento real para que un cambio futuro sea deliberado.
 		expect(slugDe("sv/algo")).toBe("algo");
+	});
+});
+
+describe("transicionEntrada", () => {
+	it("no deja barras: el nombre es un <custom-ident>", () => {
+		expect(transicionEntrada("es/derecho-laboral/demanda-laboral")).toBe(
+			"entrada-icono-derecho-laboral-demanda-laboral",
+		);
+	});
+
+	it("distingue dos publicaciones de la misma área", () => {
+		// Es la razón de que el nombre vaya por publicación y no por área: dos
+		// elementos con el mismo nombre en una página anulan la transición.
+		expect(transicionEntrada("es/asesoria-academica/tesis")).not.toBe(
+			transicionEntrada("es/asesoria-academica/tutorias"),
+		);
 	});
 });
 

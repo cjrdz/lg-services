@@ -206,37 +206,6 @@ export default config({
 					defaultValue: "/contacto",
 					validation: { isRequired: true },
 				}),
-				propuestas: fields.array(
-					fields.object({
-						icono: fields.select({
-							label: "Ícono",
-							options: [
-								{ label: "Balanza (legal)", value: "lucide:scale" },
-								{ label: "Casa", value: "lucide:home" },
-								{ label: "Auto", value: "lucide:car" },
-								{ label: "Escudo", value: "lucide:shield-check" },
-								{ label: "Diploma", value: "lucide:graduation-cap" },
-								{ label: "Maletín", value: "lucide:briefcase" },
-							],
-							defaultValue: "lucide:scale",
-						}),
-						titulo: fields.text({
-							label: "Título",
-							validation: { isRequired: true, length: { min: 3 } },
-						}),
-						descripcion: fields.text({
-							label: "Descripción",
-							multiline: true,
-							validation: { isRequired: true, length: { min: 20 } },
-						}),
-					}),
-					{
-						label: "Puntos destacados",
-						description: "Máximo 4. Arrastrá para reordenar.",
-						itemLabel: (p) => p.fields.titulo.value || "Punto",
-						validation: { length: { max: 4 } },
-					},
-				),
 				mostrarPropiedadesDestacadas: fields.checkbox({
 					label: "Mostrar propiedades destacadas en el inicio",
 					defaultValue: true,

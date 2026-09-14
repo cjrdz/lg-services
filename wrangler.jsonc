@@ -33,11 +33,13 @@
 		"PUBLIC_MEDIA_BASE_URL": "PENDIENTE-VER-SETUP-R2.md",
 
 		/*
-		  Dominio del sitio. Sin dominio propio va la URL de workers.dev que
-		  Cloudflare asigna al desplegar (la dice `wrangler deploy`).
-		  Alimenta canónicas, sitemap, hreflang y Open Graph.
+		  Dominio del sitio. Alimenta canónicas, sitemap, hreflang y Open Graph.
+		  Comprado en Porkbun: gutierrezgroup.blog. Falta conectarlo como
+		  dominio propio del Worker en Cloudflare (Workers & Pages → lg-services
+		  → Settings → Domains & Routes) y apuntar el DNS desde Porkbun — ver
+		  SETUP-DESPLIEGUE.md.
 		*/
-		"PUBLIC_SITE_URL": "PENDIENTE-VER-SETUP-DESPLIEGUE.md",
+		"PUBLIC_SITE_URL": "https://gutierrezgroup.blog",
 
 		/*
 		  Slug de la GitHub App que crea el asistente de Keystatic. Es público

@@ -3,7 +3,13 @@ import { DEFAULT_LOCALE, type Locale } from "@/i18n/config";
 import type { AreaId } from "./taxonomia";
 
 // Re-exported so pages keep importing everything from one place.
-export { slugDe, formatearFecha, tiempoLectura, formatearPrecio } from "./formato";
+export {
+	slugDe,
+	transicionEntrada,
+	formatearFecha,
+	tiempoLectura,
+	formatearPrecio,
+} from "./formato";
 
 /**
  * Reads collections with the site's rules applied in ONE place: filtering
