@@ -3,7 +3,6 @@
 	"include": [".astro/types.d.ts", "**/*"],
 	"exclude": ["dist", ".wrangler"],
 	"compilerOptions": {
-		"baseUrl": ".",
 		"paths": {
 			"@/*": ["./src/*"],
 			"$lib": ["./src/lib"],
