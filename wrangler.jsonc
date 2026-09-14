@@ -46,7 +46,7 @@
 		  (va al navegador); los tres secretos que lo acompañan se cargan con
 		  `wrangler secret put`. Ver SETUP-DESPLIEGUE.md.
 		*/
-		"PUBLIC_KEYSTATIC_GITHUB_APP_SLUG": "PENDIENTE-VER-SETUP-DESPLIEGUE.md",
+		"PUBLIC_KEYSTATIC_GITHUB_APP_SLUG": "cjrdz-keystatic",
 	},
 
 	// Los secretos (KEYSTATIC_GITHUB_CLIENT_ID / _SECRET, KEYSTATIC_SECRET) se
