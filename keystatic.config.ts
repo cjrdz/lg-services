@@ -148,9 +148,11 @@ export default config({
 			name: "Panel de Lisbeth",
 			mark: () =>
 				createElement("img", {
-					src: "/favicon.svg",
+					src: "/icon.png",
 					alt: "",
-					width: 24,
+					// icon.png is 346×445 (not square) — fixed height, proportional
+					// width, so the "G" mark doesn't get squished into a square box.
+					width: 19,
 					height: 24,
 				}),
 		},
