@@ -36,9 +36,26 @@ const t = useTranslations(locale);
 					)}
 				</div>
 
-				<ol class="revelar">
-					{pasos.map((paso, i) => (
-						<li class="border-banda-linea grid grid-cols-[2.6rem_minmax(0,1fr)] gap-5 border-t py-6 last:border-b">
+			{/*
+			  One step at a time, not one block: the list IS a sequence, so each
+			  <li> reveals on its own view() timeline. The inline offsets (0/20/40%)
+			  make 02 follow 01 and 03 follow 02 with a noticeable gap; the
+			  default grid offsets (0/6/12%) were too tight for a vertical list
+			  and made the three steps read as one block. Zero JS — reduced
+			  motion still shows everything at once.
+			*/}
+			<ol class="revelar-grupo">
+				{pasos.map((paso, i) => {
+					// Stronger per-step offsets so the sequence actually reads:
+					// 01 enters first, 02 a noticeable distance later, 03 last.
+					// The default grid offsets (0/6/12%) made the three steps
+					// look like one block on a vertical list.
+					const retraso = i === 0 ? "0%" : i === 1 ? "20%" : "40%";
+					return (
+						<li
+							class="border-banda-linea grid grid-cols-[2.6rem_minmax(0,1fr)] gap-5 border-t py-6 last:border-b"
+							style={`--revelar-retraso: ${retraso}`}
+						>
 							<span
 								aria-hidden="true"
 								class="text-accent font-serif text-xl tabular-nums"
@@ -50,7 +67,7 @@ const t = useTranslations(locale);
 								<p class="mt-1.5 leading-relaxed">{paso.descripcion}</p>
 							</div>
 						</li>
-					))}
+					)})}
 				</ol>
 			</div>
 		</section>

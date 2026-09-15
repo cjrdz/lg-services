@@ -88,6 +88,11 @@
 		</label>
 	</div>
 
+	<!--
+		Fields share `color-animado` so the border glides instead of snapping
+		when `aria-invalid` marks the field with the error — the message under
+		it says what's wrong, the border says where.
+	-->
 	<div class="grid gap-4 sm:grid-cols-2">
 		<label class="block">
 			<span class="text-sm font-medium">{textos.nombre}</span>
@@ -97,7 +102,7 @@
 				required
 				autocomplete="name"
 				aria-invalid={errores.nombre ? "true" : undefined}
-				class="border-input bg-background mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+				class="border-input bg-background color-animado aria-invalid:border-destructive mt-1 w-full rounded-lg border px-3 py-2 text-sm"
 			/>
 			{#if errores.nombre}
 				<span class="error-animado text-destructive mt-1 block text-xs">{errores.nombre}</span>
@@ -112,7 +117,7 @@
 				required
 				autocomplete="email"
 				aria-invalid={errores.correo ? "true" : undefined}
-				class="border-input bg-background mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+				class="border-input bg-background color-animado aria-invalid:border-destructive mt-1 w-full rounded-lg border px-3 py-2 text-sm"
 			/>
 			{#if errores.correo}
 				<span class="error-animado text-destructive mt-1 block text-xs">{errores.correo}</span>
@@ -125,7 +130,7 @@
 				type="tel"
 				name="telefono"
 				autocomplete="tel"
-				class="border-input bg-background mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+				class="border-input bg-background color-animado mt-1 w-full rounded-lg border px-3 py-2 text-sm"
 			/>
 		</label>
 
@@ -134,7 +139,7 @@
 			<select
 				name="motivo"
 				required
-				class="border-input bg-background mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+				class="border-input bg-background color-animado mt-1 w-full rounded-lg border px-3 py-2 text-sm"
 			>
 				{#each motivos as m (m.id)}
 					<option value={m.id}>{m.etiqueta}</option>
@@ -150,7 +155,7 @@
 			rows="6"
 			required
 			aria-invalid={errores.mensaje ? "true" : undefined}
-			class="border-input bg-background mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+			class="border-input bg-background color-animado aria-invalid:border-destructive mt-1 w-full rounded-lg border px-3 py-2 text-sm"
 		></textarea>
 		{#if errores.mensaje}
 			<span class="error-animado text-destructive mt-1 block text-xs">{errores.mensaje}</span>
@@ -162,7 +167,8 @@
 			type="checkbox"
 			name="privacidad"
 			required
-			class="border-input mt-0.5 size-4 rounded border"
+			aria-invalid={errores.privacidad ? "true" : undefined}
+			class="border-input color-animado aria-invalid:border-destructive mt-0.5 size-4 rounded border"
 		/>
 		<span class="text-muted-foreground text-sm">
 			{#if avisoPrivacidadUrl}
@@ -189,10 +195,16 @@
 		<div class="cf-turnstile" data-sitekey={turnstileSiteKey}></div>
 	{/if}
 
+	<!--
+		Same hover as the home hero's primary CTA. `color-animado` replaces
+		`transition-opacity`: a utility would win the cascade and make the
+		background snap (the trap documented on `.elevable`), and the disabled
+		fade happens under the spinner anyway.
+	-->
 	<button
 		type="submit"
 		disabled={enviando}
-		class="bg-primary text-primary-foreground inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium transition-opacity disabled:opacity-60"
+		class="bg-primary text-primary-foreground hover:bg-primary/90 color-animado inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium disabled:opacity-60"
 	>
 		<!--
 			The icon tells the submit's state: plane -> spinning -> checkmark.

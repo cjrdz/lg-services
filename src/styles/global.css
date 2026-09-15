@@ -322,44 +322,22 @@
 	}
 
 	/*
-	  The portrait's backdrop is magenta — the opposite hue to the navy this
-	  site is built on, and the one thing in the photo that fights the palette.
-	  Desaturating it and laying a brand veil in `color` blend mode turns it
-	  into a neutral curtain without touching skin tones, which keep their own
-	  lightness.
+	  Portraits keep their original color. The previous desaturation + brand
+	  veil gave them a cold, blue-gray cast that looked nothing like the
+	  source photo; now the image renders as-is and a soft shadow lifts the
+	  frame off the page.
 
-	  This lives here and not in the markup because it IS a color decision, and
-	  colors are defined in exactly one file.
+	  This lives here and not in the markup because color and shadow values
+	  are defined in exactly one file.
 	*/
-	.retrato-neutro {
-		/*
-		  The design file specified saturate(0.42); checked in the browser
-		  against the real photo, that still left a clearly purple curtain.
-		  0.3 is where it stops reading as a color and starts reading as a
-		  backdrop, and skin tones survive it because they were never near
-		  that chroma to begin with.
-		*/
-		filter: saturate(0.3) contrast(1.06);
+	.retrato-marco {
+		box-shadow: 0 16px 48px -16px oklch(0 0 0 / 0.2);
 	}
 
-	.retrato-velo {
-		position: relative;
+	.dark .retrato-marco {
+		box-shadow: 0 16px 48px -12px oklch(0 0 0 / 0.5);
 	}
 
-	.retrato-velo::after {
-		content: "";
-		position: absolute;
-		inset: 0;
-		background-color: var(--primary);
-		opacity: 0.2;
-		mix-blend-mode: color;
-		pointer-events: none;
-	}
-
-	/* Dark mode already dims everything; a full-strength veil turns it muddy. */
-	.dark .retrato-velo::after {
-		opacity: 0.1;
-	}
 
 	/*
 	  Long-form copy: MDX from the panel, legal pages, articles.

@@ -115,15 +115,8 @@ const {
 				}
 			</div>
 
-			{
-				/*
-			  `.retrato-velo` lays the brand veil over this box and
-			  `.retrato-neutro` (on the <img>, passed in by the page)
-			  desaturates the magenta backdrop of the photo itself.
-			*/
-			}
 			<div
-				class="border-border retrato-velo hero-animable-imagen bg-muted relative min-h-[24rem] overflow-hidden border-t lg:min-h-[34rem] lg:border-t-0 lg:border-l"
+				class="border-border hero-animable-imagen retrato-marco bg-muted relative min-h-[24rem] overflow-hidden border-t lg:min-h-[34rem] lg:border-t-0 lg:border-l"
 			>
 				<slot name="imagen" />
 			</div>

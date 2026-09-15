@@ -52,11 +52,13 @@ const entradas = [
 	visible && (
 		<section class="bg-secondary border-border border-b">
 			<div class="contenedor py-14 lg:py-16">
-				<div class="revelar mb-7 flex flex-wrap items-baseline justify-between gap-4">
+				<div class="revelar mb-7">
 					<h2 class="font-serif text-2xl font-normal tracking-tight sm:text-3xl">
 						{t("home.modulos.titulo")}
 					</h2>
-					<p class="text-muted-foreground text-sm">{t("home.modulos.nota")}</p>
+					<p class="text-muted-foreground mt-2 max-w-[54ch] text-sm leading-relaxed">
+						{t("home.modulos.nota")}
+					</p>
 				</div>
 
 				{destacados.length > 0 ? (
