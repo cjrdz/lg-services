@@ -1,8 +1,17 @@
 ---
+import { getCollection } from "astro:content";
 import type { Locale } from "@/i18n/config";
 import { useTranslations } from "@/i18n";
 import { localizedUrl } from "@/i18n/routing";
-import { CONTACTO, SITIO, redesActivas, telUrl, whatsappUrl } from "@/lib/sitio";
+import {
+	CONTACTO,
+	SITIO,
+	iniciales,
+	redesActivas,
+	telUrl,
+	whatsappUrl,
+} from "@/lib/sitio";
+import { areasOrdenadas } from "@/lib/taxonomia";
 import Icon from "@/components/Icon.astro";
 
 interface Props {
@@ -16,28 +25,126 @@ const anio = new Date().getFullYear();
 const redes = redesActivas();
 
 /*
-  Empty on purpose. These two pages used to be linked from the footer — so,
-  from all 20 pages on the site — but didn't exist: 40 links to a 404.
-  They'll be added back once the pages exist.
-  `bun run lint:links` keeps this from happening again.
+  The legal links used to be a hand-maintained array kept empty with a comment,
+  because linking pages that don't exist yet put 40 links to a 404 across the
+  site. Reading the collection instead means they appear the moment Lisbeth
+  unchecks "borrador" in the panel — and never before. Same guard the contact
+  form uses for its privacy-notice link.
 */
-const legales: Array<{ path: string; label: string }> = [];
+const paginasLegales = await getCollection("paginas", ({ data }) => !data.borrador);
+const legales = paginasLegales.map((p) => ({
+	href: localizedUrl(`/legal/${p.id}`, locale),
+	label: p.data.titulo,
+}));
+
+// Four, not seven: the footer is a signpost, /servicios/ is the index.
+const areas = areasOrdenadas(locale).slice(0, 4);
+
+const secciones = [
+	{ path: "/servicios", label: t("nav.servicios"), visible: true },
+	{
+		path: "/propiedades",
+		label: t("nav.propiedades"),
+		visible: SITIO.modulos.propiedades,
+	},
+	{ path: "/vehiculos", label: t("nav.vehiculos"), visible: SITIO.modulos.vehiculos },
+	{ path: "/blog", label: t("blog.titulo"), visible: SITIO.modulos.blog },
+	{ path: "/contacto", label: t("nav.contacto"), visible: true },
+].filter((s) => s.visible);
 ---
 
-<footer class="border-border bg-muted/30 mt-16 border-t">
-	<div class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-		<div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+<footer class="bg-pie text-pie-foreground mt-auto">
+	<div class="contenedor py-14">
+		<div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
 			<div>
-				<p class="font-serif text-lg font-semibold">{SITIO.nombreLegal}</p>
-				<p class="text-muted-foreground mt-1 text-sm">{SITIO.profesion}</p>
-				<p class="text-muted-foreground mt-4 text-sm">{CONTACTO.direccion}</p>
+				<div class="flex items-center gap-3">
+					<span
+						aria-hidden="true"
+						class="border-pie-linea text-pie-titulo grid size-10 shrink-0 place-items-center border font-serif text-lg"
+					>
+						{iniciales()}
+					</span>
+					<span class="text-pie-titulo font-serif text-[1.05rem]">
+						{SITIO.nombreLegal}
+					</span>
+				</div>
+				<p class="mt-4 max-w-[34ch] text-sm leading-relaxed">
+					{t("sitio.tagline")}
+				</p>
+				<p class="mt-3 text-sm">{CONTACTO.direccion}</p>
+
+				{
+					redes.length > 0 && (
+						<div class="mt-5 flex gap-2">
+							{redes.map((r) => (
+								<a
+									href={r.url}
+									target="_blank"
+									rel="noopener noreferrer"
+									aria-label={r.red}
+									class="border-pie-linea hover:border-accent hover:text-accent color-animado inline-flex size-9 items-center justify-center rounded-lg border"
+								>
+									<Icon name={r.icono} size={17} />
+								</a>
+							))}
+						</div>
+					)
+				}
 			</div>
 
 			<div>
-				<h2 class="text-sm font-semibold">{t("contacto.titulo")}</h2>
-				<ul class="text-muted-foreground mt-3 space-y-2 text-sm">
+				<h2
+					class="text-pie-titulo/70 text-[0.7rem] font-bold tracking-[0.12em] uppercase"
+				>
+					{t("home.seccionServicios")}
+				</h2>
+				<ul class="mt-3.5 flex flex-col gap-2 text-sm">
+					{
+						areas.map((a) => (
+							<li>
+								<a
+									href={localizedUrl(`/servicios/${a.id}`, locale)}
+									class="hover:text-pie-titulo color-animado"
+								>
+									{a.titulo}
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</div>
+
+			<div>
+				<h2
+					class="text-pie-titulo/70 text-[0.7rem] font-bold tracking-[0.12em] uppercase"
+				>
+					{t("nav.menuPrincipal")}
+				</h2>
+				<ul class="mt-3.5 flex flex-col gap-2 text-sm">
+					{
+						secciones.map((s) => (
+							<li>
+								<a
+									href={localizedUrl(s.path, locale)}
+									class="hover:text-pie-titulo color-animado"
+								>
+									{s.label}
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</div>
+
+			<div>
+				<h2
+					class="text-pie-titulo/70 text-[0.7rem] font-bold tracking-[0.12em] uppercase"
+				>
+					{t("contacto.titulo")}
+				</h2>
+				<ul class="mt-3.5 flex flex-col gap-2 text-sm">
 					<li>
-						<a href={telUrl()} class="hover:text-foreground transition-colors">
+						<a href={telUrl()} class="hover:text-pie-titulo color-animado tabular-nums">
 							{CONTACTO.telefono}
 						</a>
 					</li>
@@ -46,7 +153,7 @@ const legales: Array<{ path: string; label: string }> = [];
 							href={whatsappUrl()}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="hover:text-foreground transition-colors"
+							class="hover:text-pie-titulo color-animado"
 						>
 							{t("common.whatsapp")}
 						</a>
@@ -54,58 +161,39 @@ const legales: Array<{ path: string; label: string }> = [];
 					<li>
 						<a
 							href={`mailto:${CONTACTO.correo}`}
-							class="hover:text-foreground transition-colors"
+							class="hover:text-pie-titulo color-animado break-all"
 						>
 							{CONTACTO.correo}
 						</a>
 					</li>
 				</ul>
-			</div>
 
-			<div>
-				<h2 class="text-sm font-semibold">{t("contacto.horario")}</h2>
-				<ul class="text-muted-foreground mt-3 space-y-1 text-sm">
+				<h2
+					class="text-pie-titulo/70 mt-6 text-[0.7rem] font-bold tracking-[0.12em] uppercase"
+				>
+					{t("contacto.horario")}
+				</h2>
+				<ul class="mt-3.5 flex flex-col gap-1 text-sm">
 					{
 						CONTACTO.horario.map((h) => (
 							<li>
-								<span class="text-foreground">{h.dias}:</span> {h.horas}
+								<span class="text-pie-titulo">{h.dias}</span> {h.horas}
 							</li>
 						))
 					}
 				</ul>
-
-				{
-					redes.length > 0 && (
-						<div class="mt-4 flex gap-2">
-							{redes.map((r) => (
-								<a
-									href={r.url}
-									target="_blank"
-									rel="noopener noreferrer"
-									aria-label={r.red}
-									class="hover:bg-muted inline-flex size-9 items-center justify-center rounded-lg transition-colors"
-								>
-									<Icon name={r.icono} size={18} />
-								</a>
-							))}
-						</div>
-					)
-				}
 			</div>
 		</div>
 
 		<div
-			class="border-border text-muted-foreground mt-10 flex flex-col gap-3 border-t pt-6 text-sm sm:flex-row sm:items-center sm:justify-between"
+			class="border-pie-linea mt-12 flex flex-col gap-3 border-t pt-6 text-[0.8rem] sm:flex-row sm:items-center sm:justify-between"
 		>
 			<p>© {anio} {SITIO.nombreLegal}</p>
 
-			<nav class="flex flex-wrap gap-4">
+			<nav class="flex flex-wrap gap-x-5 gap-y-2">
 				{
 					legales.map((l) => (
-						<a
-							href={localizedUrl(l.path, locale)}
-							class="hover:text-foreground transition-colors"
-						>
+						<a href={l.href} class="hover:text-pie-titulo color-animado">
 							{l.label}
 						</a>
 					))
@@ -114,7 +202,7 @@ const legales: Array<{ path: string; label: string }> = [];
 					href="https://jrdz.dev/es/about/"
 					target="_blank"
 					rel="noopener noreferrer"
-					class="hover:text-foreground transition-colors"
+					class="hover:text-pie-titulo color-animado"
 				>
 					creado por jrdz.dev
 				</a>

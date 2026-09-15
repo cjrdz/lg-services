@@ -1,3 +1,22 @@
+/*
+  Fonts, self-hosted.
+
+  They go FIRST because CSS requires every @import to precede any other rule.
+  `wght.css` and not `index.css`: the weight-only variable axis, without the
+  optical-size axis, is one file per subset instead of two and nothing in the
+  design asks for `opsz`.
+
+  These packages register the families as "Newsreader Variable" and
+  "Public Sans Variable" — that exact name has to head the stacks below, with
+  the static name after it as a fallback.
+
+  Before this, --font-sans said "Inter" and --font-serif said "Lora" and NEITHER
+  was ever loaded: no @font-face, no <link>, nothing in public/. The site was
+  rendering in system-ui and Georgia while claiming otherwise.
+*/
+@import "@fontsource-variable/newsreader/wght.css";
+@import "@fontsource-variable/public-sans/wght.css";
+
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
@@ -32,13 +51,27 @@
 	--color-gold-400: oklch(0.79 0.13 85);
 	--color-gold-500: oklch(0.72 0.15 85);
 	--color-gold-600: oklch(0.62 0.14 85);
+	/*
+	  gold-700 exists for ONE reason: text. gold-600 on --background is ~3.3:1,
+	  and the eyebrow that uses it is 12px — small text needs 4.5:1. This step
+	  gets there (~4.8:1). The lighter golds stay for decoration (the 28×2 rule,
+	  the 01/02/03 ordinals on navy), where the ratio isn't the test.
+	*/
+	--color-gold-700: oklch(0.52 0.13 85);
 
+	/*
+	  Public Sans over Inter: an institutional grotesque, not a geometric one.
+	  Newsreader over Lora for headings, numerals and pull quotes.
+	*/
 	--font-sans:
-		"Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-		"Helvetica Neue", sans-serif;
-	--font-serif: "Lora", ui-serif, Georgia, Cambria, "Times New Roman", serif;
+		"Public Sans Variable", "Public Sans", ui-sans-serif, system-ui, -apple-system,
+		"Segoe UI", sans-serif;
+	--font-serif:
+		"Newsreader Variable", "Newsreader", ui-serif, Georgia, Cambria, "Times New Roman",
+		serif;
 
-	--radius-card: 0.875rem;
+	/* 14px reads as an app. 4px reads as a document. */
+	--radius-card: 0.25rem;
 
 	/*
 	  Motion. Same as colors — the values live here, not scattered across
@@ -75,6 +108,20 @@
 	--color-muted-foreground: var(--muted-foreground);
 	--color-accent: var(--accent);
 	--color-accent-foreground: var(--accent-foreground);
+	--color-accent-texto: var(--accent-texto);
+	/*
+	  Two dark surfaces at different depths: the process band and the footer.
+	  They're tokens and not `bg-brand-900` in the markup for the usual reason —
+	  a literal from the raw scale wouldn't flip when the theme does.
+	*/
+	--color-banda: var(--banda);
+	--color-banda-foreground: var(--banda-foreground);
+	--color-banda-titulo: var(--banda-titulo);
+	--color-banda-linea: var(--banda-linea);
+	--color-pie: var(--pie);
+	--color-pie-foreground: var(--pie-foreground);
+	--color-pie-titulo: var(--pie-titulo);
+	--color-pie-linea: var(--pie-linea);
 	--color-destructive: var(--destructive);
 	--color-destructive-foreground: var(--destructive-foreground);
 	--color-success: var(--success);
@@ -90,7 +137,7 @@
 }
 
 :root {
-	--radius: 0.625rem;
+	--radius: 0.25rem;
 
 	--background: oklch(0.99 0.002 250);
 	--foreground: oklch(0.21 0.02 250);
@@ -99,15 +146,31 @@
 	--popover: oklch(1 0 0);
 	--popover-foreground: var(--foreground);
 
-	--primary: var(--color-brand-600);
+	/*
+	  brand-600 → brand-800. Same hue, same gold: what changes is the weight.
+	  A mid blue reads as SaaS; a deep navy reads as an institution.
+	*/
+	--primary: var(--color-brand-800);
 	--primary-foreground: oklch(0.99 0.002 250);
 	--secondary: oklch(0.96 0.008 250);
-	--secondary-foreground: var(--color-brand-800);
+	--secondary-foreground: var(--color-brand-900);
 
 	--muted: oklch(0.96 0.006 250);
 	--muted-foreground: oklch(0.5 0.02 250);
 	--accent: var(--color-gold-500);
 	--accent-foreground: oklch(0.21 0.03 85);
+	/* Gold as TEXT — see the note on --color-gold-700. */
+	--accent-texto: var(--color-gold-700);
+
+	--banda: var(--color-brand-900);
+	--banda-foreground: var(--color-brand-200);
+	--banda-titulo: oklch(0.99 0.002 250);
+	--banda-linea: var(--color-brand-700);
+
+	--pie: var(--color-brand-950);
+	--pie-foreground: var(--color-brand-200);
+	--pie-titulo: oklch(0.99 0.002 250);
+	--pie-linea: var(--color-brand-800);
 
 	--destructive: oklch(0.58 0.21 27);
 	--destructive-foreground: oklch(0.99 0 0);
@@ -131,7 +194,11 @@
 	--popover: oklch(0.21 0.018 250);
 	--popover-foreground: var(--foreground);
 
-	--primary: var(--color-brand-400);
+	/*
+	  The deep navy that carries the light theme has no contrast against a dark
+	  background, so here primary goes the other way and gets light.
+	*/
+	--primary: var(--color-brand-300);
 	--primary-foreground: oklch(0.16 0.02 250);
 	--secondary: oklch(0.26 0.02 250);
 	--secondary-foreground: oklch(0.95 0.005 250);
@@ -140,6 +207,22 @@
 	--muted-foreground: oklch(0.68 0.015 250);
 	--accent: var(--color-gold-400);
 	--accent-foreground: oklch(0.18 0.03 85);
+	--accent-texto: var(--color-gold-300);
+
+	/*
+	  In dark mode the two bands can't be brand-900/950: those sit right on top
+	  of --background (0.16) and the band would simply vanish. They separate by
+	  going one step lighter and one step darker than the page instead.
+	*/
+	--banda: oklch(0.21 0.018 250);
+	--banda-foreground: oklch(0.8 0.015 250);
+	--banda-titulo: var(--foreground);
+	--banda-linea: oklch(0.32 0.02 250);
+
+	--pie: oklch(0.13 0.012 250);
+	--pie-foreground: oklch(0.72 0.015 250);
+	--pie-titulo: var(--foreground);
+	--pie-linea: oklch(0.26 0.02 250);
 
 	--destructive: oklch(0.66 0.19 27);
 	--destructive-foreground: oklch(0.16 0 0);
@@ -182,6 +265,120 @@
   this is one CSS rule.
 */
 @layer components {
+	/*
+	  One measure for the whole site.
+
+	  The layout is a stack of full-bleed bands separated by a hairline, and the
+	  content inside each one lines up on the same column. Before this every
+	  page repeated `mx-auto max-w-6xl px-4 sm:px-6` and a couple had drifted to
+	  other widths.
+
+	  Don't put Tailwind layout utilities on the same element: a utility beats
+	  a component-layer rule and would silently win (same cascade trap
+	  documented on `.elevable`).
+	*/
+	.contenedor {
+		max-inline-size: 80rem;
+		margin-inline: auto;
+		padding-inline: 1rem;
+	}
+
+	@media (width >= 40rem) {
+		.contenedor {
+			padding-inline: 1.5rem;
+		}
+	}
+
+	@media (width >= 64rem) {
+		.contenedor {
+			padding-inline: 2.5rem;
+		}
+	}
+
+	/*
+	  Hairline grid: cells share one 1px rule instead of floating apart.
+
+	  The lines are borders on the CHILDREN, pulled back by a negative margin so
+	  the last column and last row land exactly on the container's own border
+	  instead of doubling it.
+
+	  The obvious version — `gap: 1px` over a border-colored background — is one
+	  line shorter and wrong: the grid's background is what shows through the
+	  gap, so a row that doesn't fill (5 subservicios in 2 columns, 7 blog areas
+	  in 3) paints the leftover track as a solid grey block. Here the container
+	  is card-colored, so an unfilled tail just reads as empty.
+	*/
+	.rejilla-hilo {
+		display: grid;
+		background-color: var(--card);
+		border: 1px solid var(--border);
+	}
+
+	.rejilla-hilo > * {
+		border-inline-end: 1px solid var(--border);
+		border-block-end: 1px solid var(--border);
+		margin-inline-end: -1px;
+		margin-block-end: -1px;
+	}
+
+	/*
+	  The portrait's backdrop is magenta — the opposite hue to the navy this
+	  site is built on, and the one thing in the photo that fights the palette.
+	  Desaturating it and laying a brand veil in `color` blend mode turns it
+	  into a neutral curtain without touching skin tones, which keep their own
+	  lightness.
+
+	  This lives here and not in the markup because it IS a color decision, and
+	  colors are defined in exactly one file.
+	*/
+	.retrato-neutro {
+		/*
+		  The design file specified saturate(0.42); checked in the browser
+		  against the real photo, that still left a clearly purple curtain.
+		  0.3 is where it stops reading as a color and starts reading as a
+		  backdrop, and skin tones survive it because they were never near
+		  that chroma to begin with.
+		*/
+		filter: saturate(0.3) contrast(1.06);
+	}
+
+	.retrato-velo {
+		position: relative;
+	}
+
+	.retrato-velo::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background-color: var(--primary);
+		opacity: 0.2;
+		mix-blend-mode: color;
+		pointer-events: none;
+	}
+
+	/* Dark mode already dims everything; a full-strength veil turns it muddy. */
+	.dark .retrato-velo::after {
+		opacity: 0.1;
+	}
+
+	/*
+	  Long-form copy: MDX from the panel, legal pages, articles.
+
+	  Headings take the serif at its normal weight — Newsreader 400 at 30px has
+	  more presence than any sans at 700, and a bold serif reads as heavy rather
+	  than authoritative. The measure is capped at 68ch because that's where a
+	  16.5px line stops needing a head-turn to follow.
+	*/
+	.prose :is(h1, h2, h3, h4) {
+		font-family: var(--font-serif);
+		font-weight: 400;
+		letter-spacing: -0.01em;
+	}
+
+	.prose {
+		max-inline-size: 68ch;
+	}
+
 	.aparece {
 		opacity: 1;
 		translate: 0 0;
@@ -313,6 +510,10 @@
 		transition-delay: 260ms;
 	}
 
+	.hero-animable-datos {
+		transition-delay: 360ms;
+	}
+
 	.hero-animable-imagen {
 		opacity: 1;
 		scale: 1;
@@ -330,75 +531,22 @@
 	}
 
 	/*
-	  Once the CSS entrance is done, remove the transition so GSAP can scrub
-	  opacity/transform without fighting the CSS transition on every frame.
+	  GONE, on purpose — do not bring these back:
+
+	  .hero-aura      two brand-colored radial gradients behind the hero. A
+	                  radial brand glow is the single strongest "generated
+	                  site" tell. It existed because the hero was a short text
+	                  column next to a small portrait and the rest of the band
+	                  read as an empty white field; the fix is that the portrait
+	                  now fills that band edge to edge, with a rule down its
+	                  left side — not a colored light.
+
+	  .cta-backlight  the primary button pulsed three times on load. An element
+	                  that moves by itself on a lawyer's page reads as an ad.
+
+	  .hero-animacion-lista  only HeroInteracciones.svelte added it, and that
+	                  island is gone with the pointer parallax.
 	*/
-	.hero-animacion-lista {
-		transition: none !important;
-	}
-
-	/*
-	  Hero backdrop: two very soft brand-colored lights behind the content.
-
-	  Purely decorative, so it lives on an aria-hidden element and is taken
-	  out of the flow — the hero's layout is identical with it removed. It
-	  exists because the hero is a short text column next to a portrait, and
-	  on a wide screen the rest of the band read as an empty white field.
-
-	  The element is translated by HeroInteracciones as the pointer moves
-	  (opposite to the portrait, so the two read as different depths). With
-	  no pointer — a phone — it just sits still.
-	*/
-	.hero-aura {
-		background:
-			radial-gradient(
-				34rem 24rem at 62% 32%,
-				color-mix(in oklch, var(--primary) 16%, transparent),
-				transparent 68%
-			),
-			radial-gradient(
-				28rem 20rem at 18% 78%,
-				color-mix(in oklch, var(--accent) 12%, transparent),
-				transparent 70%
-			);
-		opacity: 1;
-		transition: opacity 1.2s var(--curva-suave);
-	}
-
-	@starting-style {
-		.hero-aura {
-			opacity: 0;
-		}
-	}
-
-	/*
-	  Hero primary CTA: a soft backlight pulse using the brand color.
-
-	  Finite on purpose — three pulses, about seven seconds, then it settles
-	  into the resting shadow. An infinite glow is the one thing on the page
-	  that never stops moving, and on a lawyer's site that reads as an ad.
-	  The resting shadow matches the 0% keyframe so the end isn't a jump.
-	*/
-	.cta-backlight {
-		box-shadow:
-			0 0 0 0 color-mix(in oklch, var(--primary) 35%, transparent),
-			0 4px 14px -6px color-mix(in oklch, var(--primary) 20%, transparent);
-		animation: cta-pulso 2.4s var(--curva-suave) 3;
-	}
-
-	@keyframes cta-pulso {
-		0%,
-		100% {
-			box-shadow:
-				0 0 0 0 color-mix(in oklch, var(--primary) 35%, transparent),
-				0 4px 14px -6px color-mix(in oklch, var(--primary) 20%, transparent);
-		}
-		50% {
-			box-shadow:
-				0 0 28px -4px color-mix(in oklch, var(--primary) 55%, transparent),
-				0 6px 20px -6px color-mix(in oklch, var(--primary) 30%, transparent);
-		}
-	}
 
 	/*
 	  Affordance arrow for cards that are links. Hidden until the pointer is
@@ -457,11 +605,6 @@
 			opacity: 1;
 			transform: none;
 			transition: none;
-		}
-
-		.cta-backlight {
-			animation: none;
-			box-shadow: 0 4px 14px -6px color-mix(in oklch, var(--primary) 20%, transparent);
 		}
 	}
 
@@ -830,12 +973,6 @@
 		animation: none !important;
 		opacity: 1 !important;
 		transform: none !important;
-	}
-
-	/* Decoration only: no reason to fade it in. */
-	:root[data-motion="sistema"] .hero-aura {
-		transition: none !important;
-		opacity: 1 !important;
 	}
 
 	:root[data-motion="sistema"] .js .acordeon-contenido {

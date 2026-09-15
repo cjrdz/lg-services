@@ -1,0 +1,58 @@
+---
+import type { Locale } from "@/i18n/config";
+import { useTranslations } from "@/i18n";
+import Antetitulo from "@/components/Antetitulo.astro";
+
+interface Props {
+	locale: Locale;
+	intro?: string;
+	pasos: ReadonlyArray<{ titulo: string; descripcion: string }>;
+}
+
+const { locale, intro, pasos } = Astro.props;
+const t = useTranslations(locale);
+---
+
+{
+	/*
+	  The whole band disappears when there are no steps. `procesoPasos` is a
+	  Keystatic array with no minimum, so "Lisbeth emptied it" has to render as
+	  nothing at all — not as a heading with a blank column under it.
+	*/
+}
+{
+	pasos.length > 0 && (
+		<section class="bg-banda text-banda-foreground">
+			<div class="contenedor grid gap-12 py-16 lg:grid-cols-[1fr_1.25fr] lg:py-20">
+				<div class="revelar">
+					<Antetitulo heredaColor conRegla={false}>
+						{t("home.proceso.antetitulo")}
+					</Antetitulo>
+					<h2 class="text-banda-titulo mt-4 font-serif text-3xl leading-tight font-normal text-balance sm:text-4xl">
+						{t("home.proceso.titulo")}
+					</h2>
+					{intro && (
+						<p class="mt-5 max-w-[40ch] text-[1.05rem] leading-relaxed">{intro}</p>
+					)}
+				</div>
+
+				<ol class="revelar">
+					{pasos.map((paso, i) => (
+						<li class="border-banda-linea grid grid-cols-[2.6rem_minmax(0,1fr)] gap-5 border-t py-6 last:border-b">
+							<span
+								aria-hidden="true"
+								class="text-accent font-serif text-xl tabular-nums"
+							>
+								{String(i + 1).padStart(2, "0")}
+							</span>
+							<div class="min-w-0">
+								<h3 class="text-banda-titulo text-lg font-semibold">{paso.titulo}</h3>
+								<p class="mt-1.5 leading-relaxed">{paso.descripcion}</p>
+							</div>
+						</li>
+					))}
+				</ol>
+			</div>
+		</section>
+	)
+}

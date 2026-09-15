@@ -23,7 +23,7 @@
 </script>
 
 <article
-	class="border-border bg-card hover:border-primary/40 group elevable relative overflow-hidden rounded-xl border {clase}"
+	class="border-border bg-card hover:border-primary/40 group elevable relative overflow-hidden rounded-lg border {clase}"
 >
 	<!--
 		The photo is clipped here rather than on the <img>, so the zoom on hover
@@ -62,7 +62,7 @@
 
 	<div class="p-4">
 		<div class="flex items-start justify-between gap-2">
-			<p class="font-semibold">
+			<p class="font-semibold tabular-nums">
 				{tarjeta.ocultarPrecio ? textos.consultarPrecio : dinero.format(tarjeta.precio)}
 				{#if !tarjeta.ocultarPrecio && tarjeta.periodoTexto}
 					<span class="text-muted-foreground text-sm font-normal">
@@ -87,7 +87,7 @@
 			</svg>
 		</div>
 
-		<h3 class="group-hover:text-primary mt-1 font-medium transition-colors">
+		<h3 class="group-hover:text-primary color-animado mt-1 font-medium">
 			<a href={tarjeta.href} class="after:absolute after:inset-0">{tarjeta.titulo}</a>
 		</h3>
 

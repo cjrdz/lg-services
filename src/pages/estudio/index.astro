@@ -37,7 +37,7 @@ const enDesarrollo = import.meta.env.DEV;
 >
 	<noscript>
 		<div class="mx-auto max-w-md px-4 py-20 text-center sm:px-6">
-			<h1 class="font-serif text-2xl font-bold">Estudio de fotos</h1>
+			<h1 class="font-serif text-2xl font-normal">Estudio de fotos</h1>
 			<p class="text-muted-foreground mt-3 text-sm">
 				Esta herramienta necesita JavaScript para preparar y subir las fotos. Activalo
 				en el navegador y volvé a cargar la página.
@@ -48,7 +48,7 @@ const enDesarrollo = import.meta.env.DEV;
 	{
 		enDesarrollo && !editor ? (
 			<div class="mx-auto max-w-lg px-4 py-20 sm:px-6">
-				<h1 class="font-serif text-2xl font-bold tracking-tight">Estudio de fotos</h1>
+				<h1 class="font-serif text-2xl font-normal tracking-tight">Estudio de fotos</h1>
 				<p class="text-muted-foreground mt-3 text-sm">
 					En el servidor de desarrollo el estudio no funciona, y no es un error:
 				</p>
@@ -64,8 +64,8 @@ const enDesarrollo = import.meta.env.DEV;
 					<li>
 						En producción, esta ruta además vive detrás de{" "}
 						<strong>Cloudflare Access</strong> (ver{" "}
-						<code class="bg-muted rounded px-1 py-0.5">SETUP-CLOUDFLARE-ACCESS.md</code>):
-						un candado aparte, delante del login de GitHub, que localhost nunca ve.
+						<code class="bg-muted rounded px-1 py-0.5">SETUP-CLOUDFLARE-ACCESS.md</code>
+						): un candado aparte, delante del login de GitHub, que localhost nunca ve.
 					</li>
 				</ul>
 				<p class="mt-5 text-sm">Para probarlo de verdad, contra el worker compilado:</p>

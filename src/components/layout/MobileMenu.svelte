@@ -6,9 +6,7 @@
 
 	function duracion(ms: number) {
 		if (typeof window === "undefined") return 0;
-		return window.matchMedia("(prefers-reduced-motion: reduce)").matches
-			? 0
-			: ms;
+		return window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : ms;
 	}
 
 	interface Enlace {
@@ -46,7 +44,7 @@
 
 <button
 	type="button"
-	class="hover:bg-muted inline-flex size-9 items-center justify-center rounded-lg transition-colors md:hidden"
+	class="hover:bg-muted inline-flex size-9 items-center justify-center rounded-lg transition-colors lg:hidden"
 	aria-label={abierto ? etiquetaCerrar : etiquetaAbrir}
 	aria-expanded={abierto}
 	aria-controls="menu-movil"
@@ -60,14 +58,14 @@
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		transition:fade={{ duration: duracion(120) }}
-		class="bg-background/80 fixed inset-0 top-16 z-40 backdrop-blur-sm md:hidden"
+		class="bg-background/80 fixed inset-0 top-20 z-40 backdrop-blur-sm lg:hidden"
 		onclick={() => (abierto = false)}
 	></div>
 
 	<nav
 		id="menu-movil"
 		transition:slide={{ duration: duracion(220), axis: "y" }}
-		class="bg-background border-border fixed inset-x-0 top-16 z-40 border-b shadow-lg md:hidden"
+		class="bg-background border-border fixed inset-x-0 top-20 z-40 border-b shadow-lg lg:hidden"
 	>
 		<ul class="flex flex-col p-2">
 			{#each enlaces as enlace (enlace.href)}

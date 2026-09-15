@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { MorphIcon } from "morphicons/svelte";
 	import { MORPH_REDUCED_MOTION } from "@/lib/motion";
-	import { ChevronDown, ChevronUp } from "lucide";
+	// Plus ↔ Minus, not a rotating chevron: the row either adds the answer or
+	// takes it away, and that's a state change morphicons is actually for.
+	import { Minus, Plus } from "lucide";
 
 	interface Props {
 		pregunta: string;
@@ -12,16 +14,16 @@
 	let abierto = $state(false);
 </script>
 
-<div class="border-border bg-card rounded-xl border">
+<div class="border-border border-b">
 	<button
 		type="button"
-		class="flex w-full items-center justify-between gap-3 p-5 text-left font-medium"
+		class="hover:text-primary color-animado flex w-full items-center justify-between gap-5 py-5 text-left text-[1.02rem] font-semibold"
 		aria-expanded={abierto}
 		onclick={() => (abierto = !abierto)}
 	>
-		{pregunta}
+		<span class="min-w-0">{pregunta}</span>
 		<MorphIcon
-			icon={abierto ? ChevronUp : ChevronDown}
+			icon={abierto ? Minus : Plus}
 			size={18}
 			reducedMotion={MORPH_REDUCED_MOTION}
 			class="text-muted-foreground shrink-0"
@@ -29,7 +31,9 @@
 	</button>
 	<div class="acordeon-contenido" class:abierto>
 		<div>
-			<p class="text-muted-foreground px-5 pb-5 text-sm">{respuesta}</p>
+			<p class="text-muted-foreground max-w-[64ch] pb-5 leading-relaxed">
+				{respuesta}
+			</p>
 		</div>
 	</div>
 </div>

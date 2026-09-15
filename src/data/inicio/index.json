@@ -1,10 +1,42 @@
 {
-	"heroTitulo": "Soluciones legales claras y cercanas",
-	"heroSubtitulo": "Asesoría y consultoría legal profesional en El Salvador, además de propiedades y vehículos en venta y alquiler.",
+	"heroTitulo": "Criterio legal claro para decisiones difíciles",
+	"heroSubtitulo": "Asesoría y consultoría en derecho civil, laboral, de familia, penal y tributario. Te atiende directamente la profesional que lleva tu caso.",
+	"heroEtiqueta": "Ejercicio legal en El Salvador",
 	"heroImagen": "/src/assets/images/perfil.jpg",
-	"heroImagenAlt": "Lisbeth Gutiérrez, asesora legal",
+	"heroImagenAlt": "Lisbeth Gutiérrez Jiménez, asesora y consultora legal",
 	"heroCtaTexto": "Agendar consulta",
 	"heroCtaUrl": "/contacto",
+	"heroDatos": [
+		{
+			"valor": "Siete",
+			"etiqueta": "áreas de práctica"
+		},
+		{
+			"valor": "Presencial y remoto",
+			"etiqueta": "en todo el país"
+		},
+		{
+			"valor": "Un solo contacto",
+			"etiqueta": "sin intermediarios"
+		}
+	],
+	"procesoIntro": "Cada etapa termina con algo concreto en tus manos: un diagnóstico, un plan y un responsable claro.",
+	"procesoPasos": [
+		{
+			"titulo": "Primer contacto",
+			"descripcion": "Una llamada o mensaje para entender tu situación y confirmar si es un asunto que puedo atender."
+		},
+		{
+			"titulo": "Análisis y diagnóstico",
+			"descripcion": "Revisión de documentos y plazos, con un resumen escrito de opciones, riesgos y costos estimados."
+		},
+		{
+			"titulo": "Gestión y seguimiento",
+			"descripcion": "Representación o acompañamiento hasta el cierre, con actualizaciones en cada avance relevante."
+		}
+	],
+	"sobreMiCita": "Mi trabajo es que entiendas tu propio caso: qué puede pasar, en qué plazos y qué decide cada paso.",
+	"sobreMiTexto": "Lisbeth Gutiérrez Jiménez, asesora y consultora legal en San Salvador. Atención a personas y pequeñas empresas.",
 	"mostrarPropiedadesDestacadas": true,
 	"mostrarVehiculosDestacados": true,
 	"maxDestacados": 3

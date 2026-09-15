@@ -84,7 +84,7 @@ const minutos = tiempoLectura(entrada.body ?? "");
 		<div class="barra-progreso bg-primary h-full w-full"></div>
 	</div>
 
-	<article class="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+	<article class="contenedor max-w-3xl py-16 lg:py-20">
 		<nav aria-label="Migas de pan" class="text-muted-foreground mb-6 text-sm">
 			<a href={localizedUrl("/blog", locale)} class="hover:text-foreground">
 				{t("blog.titulo")}
@@ -103,7 +103,7 @@ const minutos = tiempoLectura(entrada.body ?? "");
 		}
 		<span
 			transition:name={transicionEntrada(entrada.id)}
-			class="bg-secondary text-secondary-foreground mb-4 inline-flex size-12 items-center justify-center rounded-xl"
+			class="bg-secondary text-secondary-foreground mb-4 inline-flex size-12 items-center justify-center rounded-sm"
 		>
 			<Icon name={AREAS[d.area].icono} size={24} />
 		</span>
@@ -116,7 +116,7 @@ const minutos = tiempoLectura(entrada.body ?? "");
 			)
 		}
 
-		<h1 class="font-serif text-4xl font-bold tracking-tight text-balance">
+		<h1 class="font-serif text-4xl font-normal tracking-tight text-balance">
 			{d.titulo}
 		</h1>
 
@@ -143,7 +143,7 @@ const minutos = tiempoLectura(entrada.body ?? "");
 			}
 		</div>
 
-		<div class="prose prose-neutral dark:prose-invert mt-10 max-w-none">
+		<div class="prose prose-neutral dark:prose-invert mt-10">
 			<Content />
 		</div>
 
@@ -164,8 +164,8 @@ const minutos = tiempoLectura(entrada.body ?? "");
 		  antes la página terminaba en las etiquetas y no ofrecía nada.
 		*/
 		}
-		<section class="revelar border-border bg-card mt-12 rounded-xl border p-6 sm:p-8">
-			<h2 class="font-serif text-xl font-bold">{t("blog.ctaTitulo")}</h2>
+		<section class="revelar border-border bg-card mt-12 rounded-lg border p-6 sm:p-8">
+			<h2 class="font-serif text-xl font-normal">{t("blog.ctaTitulo")}</h2>
 			<p class="text-muted-foreground mt-2 text-sm">{t("blog.ctaTexto")}</p>
 
 			<div class="mt-5 flex flex-wrap gap-3">

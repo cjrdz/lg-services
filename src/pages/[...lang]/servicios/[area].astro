@@ -4,12 +4,12 @@ import { localePathsFor, localizedUrl } from "@/i18n/routing";
 import { useTranslations } from "@/i18n";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Icon from "@/components/Icon.astro";
-import { Button } from "@/components/ui/button";
+import Antetitulo from "@/components/Antetitulo.astro";
 import ListaFaq from "@/components/ListaFaq.svelte";
 import { getServicioPorArea, getServicios } from "@/lib/contenido";
-import { AREAS, AREA_IDS } from "@/lib/taxonomia";
+import { AREAS, AREA_IDS, SUBTEMAS } from "@/lib/taxonomia";
 import { esquemaFaq, esquemaMigas, esquemaServicio, migasDe } from "@/lib/seo";
-import { whatsappUrl } from "@/lib/sitio";
+import { CONTACTO, telUrl, whatsappUrl } from "@/lib/sitio";
 
 export async function getStaticPaths() {
 	// `area` goes in params (builds the URL) AND in props (to read it typed below).
@@ -46,6 +46,11 @@ const migas = migasDe(locale, [
 ]);
 
 const mensaje = t("servicios.consultar", { area: d.titulo });
+
+// The area's own position in taxonomia.ts, zero-padded: "Área de práctica 02".
+const numero = String(AREAS[area].orden).padStart(2, "0");
+
+const subtemas = SUBTEMAS[area];
 ---
 
 <BaseLayout
@@ -63,94 +68,193 @@ const mensaje = t("servicios.consultar", { area: d.titulo });
 		esquemaMigas(migas, site),
 	]}
 >
-	<article class="mx-auto max-w-3xl px-4 py-16 sm:px-6">
-		<nav aria-label="Migas de pan" class="text-muted-foreground mb-6 text-sm">
-			<a href={localizedUrl("/servicios", locale)} class="hover:text-foreground">
-				{t("servicios.titulo")}
-			</a>
-			<span class="mx-2">/</span>
-			<span class="text-foreground">{d.titulo}</span>
-		</nav>
+	{
+		/*
+	  Breadcrumbs rendered from the same `migas` array that feeds the JSON-LD,
+	  so the two can't drift apart — and `migasDe()` already puts "Inicio" at
+	  the front.
+	*/
+	}
+	<nav aria-label="Migas de pan" class="border-border border-b">
+		<ol class="contenedor text-muted-foreground flex flex-wrap py-4 text-sm">
+			{
+				migas.map((m, i) => (
+					<li class="flex items-center">
+						{i > 0 && (
+							<span aria-hidden="true" class="px-2">
+								/
+							</span>
+						)}
+						{m.url ? (
+							<a href={m.url} class="hover:text-primary color-animado">
+								{m.nombre}
+							</a>
+						) : (
+							<span class="text-foreground">{m.nombre}</span>
+						)}
+					</li>
+				))
+			}
+		</ol>
+	</nav>
 
-		{
-			/*
-		  Same transition name as the area's tile on the home page and on the
-		  services index, so arriving here morphs that small tile into this
-		  big one instead of cross-fading the page.
-		*/
-		}
-		<span
-			transition:name={`area-icono-${area}`}
-			class="bg-secondary text-secondary-foreground mb-5 inline-flex size-14 items-center justify-center rounded-2xl"
-		>
-			<Icon name={AREAS[area].icono} size={28} />
-		</span>
+	<header class="border-border border-b">
+		<div class="contenedor grid gap-12 py-14 lg:grid-cols-[1.3fr_1fr] lg:py-16">
+			<div>
+				{
+					/*
+				  The other end of the `area-icono-*` morph: the small badge on
+				  /servicios/ grows into this one instead of the page
+				  cross-fading. The name is per area and unique on the page.
+				*/
+				}
+				<span
+					transition:name={`area-icono-${area}`}
+					class="bg-secondary text-secondary-foreground mb-6 inline-flex size-14 items-center justify-center rounded-sm"
+				>
+					<Icon name={AREAS[area].icono} size={28} />
+				</span>
 
-		<h1 class="font-serif text-4xl font-bold tracking-tight text-balance">
-			{d.titulo}
-		</h1>
-		<p class="text-muted-foreground mt-4 text-lg text-pretty">{d.resumen}</p>
+				<Antetitulo>{t("servicios.areaNumero", { n: numero })}</Antetitulo>
 
-		<div class="mt-8">
-			<Button
-				href={whatsappUrl(mensaje)}
-				target="_blank"
-				rel="noopener noreferrer"
-				size="lg"
-			>
-				{mensaje}
-			</Button>
-		</div>
+				<h1
+					class="mt-4 font-serif text-4xl leading-[1.1] font-normal tracking-tight text-balance sm:text-5xl"
+				>
+					{d.titulo}
+				</h1>
+				<p class="text-muted-foreground mt-5 max-w-[52ch] text-lg leading-relaxed">
+					{d.resumen}
+				</p>
 
-		{
-			d.subservicios.length > 0 && (
-				<section class="mt-14">
-					<h2 class="font-serif text-2xl font-bold">{t("servicios.incluye")}</h2>
-					<ul class="mt-5 grid gap-3 sm:grid-cols-2">
-						{d.subservicios.map((s) => (
-							<li class="border-border bg-card rounded-xl border p-4">
-								<h3 class="font-medium">{s.titulo}</h3>
-								<p class="text-muted-foreground mt-1 text-sm">{s.descripcion}</p>
-							</li>
-						))}
-					</ul>
-				</section>
-			)
-		}
+				<a
+					href={whatsappUrl(mensaje)}
+					target="_blank"
+					rel="noopener noreferrer"
+					class="bg-primary text-primary-foreground hover:bg-primary/90 color-animado mt-8 inline-block rounded-lg px-7 py-4 text-[0.97rem] font-semibold"
+				>
+					{mensaje}
+				</a>
+			</div>
 
-		<div class="prose prose-neutral dark:prose-invert mt-14 max-w-none">
-			<Content />
-		</div>
-
-		{
-			d.faq.length > 0 && (
-				<section class="mt-14">
-					<h2 class="font-serif text-2xl font-bold">{t("servicios.faq")}</h2>
-					<div class="mt-5 space-y-4">
-						<ListaFaq items={d.faq} client:load />
+			{
+				/*
+			  SUBTEMAS has lived in taxonomia.ts since the port and no page ever
+			  showed it. It's the fastest answer to "does she handle my exact
+			  problem?" — the reason most people are on this page.
+			*/
+			}
+			{
+				subtemas.length > 0 && (
+					<div>
+						<h2 class="text-muted-foreground text-xs font-bold tracking-[0.12em] uppercase">
+							{t("servicios.subtemas")}
+						</h2>
+						<ul class="border-border mt-4 border-t">
+							{subtemas.map((s) => (
+								<li class="border-border border-b py-3 text-[0.97rem]">{s}</li>
+							))}
+						</ul>
 					</div>
-				</section>
-			)
-		}
+				)
+			}
+		</div>
+	</header>
 
-		{
-			otras.length > 0 && (
-				<section class="border-border mt-16 border-t pt-8">
-					<h2 class="text-lg font-semibold">{t("servicios.otrasAreas")}</h2>
-					<ul class="mt-4 flex flex-wrap gap-2">
-						{otras.map((s) => (
-							<li>
-								<a
-									href={localizedUrl(`/servicios/${s.data.area}`, locale)}
-									class="border-border hover:border-primary/40 hover:text-primary inline-block rounded-lg border px-3 py-1.5 text-sm transition-colors"
-								>
-									{s.data.titulo}
-								</a>
-							</li>
-						))}
-					</ul>
-				</section>
-			)
-		}
-	</article>
+	<div class="contenedor grid gap-12 py-14 lg:grid-cols-[1.3fr_1fr] lg:py-16">
+		<article class="min-w-0">
+			{
+				d.subservicios.length > 0 && (
+					<section class="revelar">
+						<h2 class="font-serif text-2xl font-normal tracking-tight sm:text-3xl">
+							{t("servicios.incluye")}
+						</h2>
+						<div class="rejilla-hilo mt-5 sm:grid-cols-2">
+							{d.subservicios.map((s) => (
+								<div class="bg-card min-w-0 p-5">
+									<h3 class="font-medium">{s.titulo}</h3>
+									<p class="text-muted-foreground mt-1.5 text-sm leading-relaxed">
+										{s.descripcion}
+									</p>
+								</div>
+							))}
+						</div>
+					</section>
+				)
+			}
+
+			{
+				/*
+			  Written by Lisbeth in the panel. `.prose` sets the serif headings
+			  and the 68ch measure in global.css — a legal document reads like a
+			  document, not like a stack of colored boxes.
+			*/
+			}
+			<div class="prose prose-neutral dark:prose-invert revelar mt-14">
+				<Content />
+			</div>
+
+			{
+				d.faq.length > 0 && (
+					<section class="revelar mt-14">
+						<h2 class="font-serif text-2xl font-normal tracking-tight sm:text-3xl">
+							{t("servicios.faq")}
+						</h2>
+						<div class="border-border mt-5 border-t">
+							<ListaFaq items={d.faq} client:load />
+						</div>
+					</section>
+				)
+			}
+		</article>
+
+		<aside class="min-w-0">
+			<div class="border-border bg-secondary rounded-lg border p-7">
+				<h2 class="text-primary font-serif text-xl font-medium">
+					{t("servicios.agendarTitulo")}
+				</h2>
+				<p class="text-muted-foreground mt-2 text-[0.95rem] leading-relaxed">
+					{t("servicios.agendarTexto")}
+				</p>
+				<a
+					href={localizedUrl("/contacto", locale)}
+					class="bg-primary text-primary-foreground hover:bg-primary/90 color-animado mt-5 block rounded-lg px-5 py-3.5 text-center text-[0.95rem] font-semibold"
+				>
+					{t("servicios.irAlFormulario")}
+				</a>
+				<a
+					href={telUrl()}
+					class="border-border hover:border-primary/50 hover:bg-card color-animado mt-2.5 block rounded-lg border px-5 py-3.5 text-center text-[0.95rem] font-semibold tabular-nums"
+				>
+					{CONTACTO.telefono}
+				</a>
+			</div>
+
+			{
+				otras.length > 0 && (
+					<section class="mt-10">
+						<h2 class="text-muted-foreground text-xs font-bold tracking-[0.12em] uppercase">
+							{t("servicios.otrasAreas")}
+						</h2>
+						<ul class="border-border mt-4 border-t">
+							{otras.map((s) => (
+								<li>
+									<a
+										href={localizedUrl(`/servicios/${s.data.area}`, locale)}
+										class="border-border hover:text-primary color-animado group flex items-center justify-between gap-4 border-b py-3 text-[0.97rem]"
+									>
+										<span class="min-w-0">{s.data.titulo}</span>
+										<Icon
+											name="lucide:arrow-right"
+											size={15}
+											class="flecha-desliza text-primary shrink-0"
+										/>
+									</a>
+								</li>
+							))}
+						</ul>
+					</section>
+				)
+			}
+		</aside>
+	</div>
 </BaseLayout>

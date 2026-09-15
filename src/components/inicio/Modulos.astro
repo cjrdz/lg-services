@@ -1,0 +1,104 @@
+---
+import type { Locale } from "@/i18n/config";
+import { useTranslations } from "@/i18n";
+import { localizedUrl } from "@/i18n/routing";
+import { SITIO } from "@/lib/sitio";
+import type { TarjetaAnuncio as TarjetaAnuncioTipo } from "@/lib/anuncios-tipos";
+import TarjetaAnuncio from "@/components/anuncios/TarjetaAnuncio.svelte";
+import Icon from "@/components/Icon.astro";
+
+interface Props {
+	locale: Locale;
+	destacados: TarjetaAnuncioTipo[];
+}
+
+const { locale, destacados } = Astro.props;
+const t = useTranslations(locale);
+
+const visible = SITIO.modulos.propiedades || SITIO.modulos.vehiculos;
+
+/*
+  Entry cards for when there's nothing featured to show — which is today's
+  state, since the only property and the only vehicle are both drafts. The
+  alternative was rendering a heading over an empty grid.
+*/
+const entradas = [
+	{
+		visible: SITIO.modulos.propiedades,
+		href: localizedUrl("/propiedades", locale),
+		titulo: t("home.modulos.propiedades"),
+		texto: t("home.modulos.propiedadesTexto"),
+		icono: "lucide:building-2",
+	},
+	{
+		visible: SITIO.modulos.vehiculos,
+		href: localizedUrl("/vehiculos", locale),
+		titulo: t("home.modulos.vehiculos"),
+		texto: t("home.modulos.vehiculosTexto"),
+		icono: "lucide:car-front",
+	},
+].filter((e) => e.visible);
+---
+
+{
+	/*
+	  The patrimonial verticals, framed as what they are: secondary to the legal
+	  practice. Same band either way — real featured listings when there are
+	  any, the two entry cards when there aren't — so the section is never empty
+	  and never promises listings it doesn't have.
+	*/
+}
+{
+	visible && (
+		<section class="bg-secondary border-border border-b">
+			<div class="contenedor py-14 lg:py-16">
+				<div class="revelar mb-7 flex flex-wrap items-baseline justify-between gap-4">
+					<h2 class="font-serif text-2xl font-normal tracking-tight sm:text-3xl">
+						{t("home.modulos.titulo")}
+					</h2>
+					<p class="text-muted-foreground text-sm">{t("home.modulos.nota")}</p>
+				</div>
+
+				{destacados.length > 0 ? (
+					<div class="revelar-grupo grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+						{destacados.map((tarjeta) => (
+							<TarjetaAnuncio
+								tarjeta={tarjeta}
+								textos={{
+									sinFoto: t("common.sinFoto"),
+									consultarPrecio: t("propiedades.consultarPrecio"),
+								}}
+							/>
+						))}
+					</div>
+				) : (
+					<div class="revelar-grupo grid gap-4 sm:grid-cols-2">
+						{entradas.map((e) => (
+							<a
+								href={e.href}
+								class="border-border bg-card hover:border-primary/40 group elevable relative flex items-start gap-4 rounded-lg border p-7"
+							>
+								<span class="bg-secondary text-primary group-hover:bg-primary group-hover:text-primary-foreground color-animado grid size-11 shrink-0 place-items-center rounded-sm">
+									<Icon name={e.icono} size={21} />
+								</span>
+								<div class="min-w-0">
+									<h3 class="text-primary font-serif text-xl font-medium">
+										{e.titulo}
+									</h3>
+									<p class="text-muted-foreground mt-1.5 text-[0.95rem] leading-relaxed">
+										{e.texto}
+									</p>
+								</div>
+								<Icon
+									name="lucide:arrow-right"
+									size={16}
+									class="text-primary flecha-tarjeta absolute right-6 bottom-6"
+								/>
+							</a>
+						))}
+					</div>
+				)}
+			</div>
+		</section>
+	)
+}

@@ -69,13 +69,34 @@ const sitioSchema = z.object({
 		.default({ propiedades: true, vehiculos: true, blog: true }),
 });
 
+/*
+  Everything added for the editorial home is optional or has a default.
+
+  Not laziness: this file parses at module scope and the layout imports it, so a
+  required field would turn "Lisbeth hasn't filled this in yet" into a failed
+  build and a page that won't render at all. The sections read the value and
+  simply don't render when it's missing — see Proceso.astro and SobreMi.astro.
+*/
 const inicioSchema = z.object({
 	heroTitulo: z.string().min(10).max(70),
 	heroSubtitulo: z.string().min(20).max(180),
+	heroEtiqueta: z.string().max(60).optional(),
 	heroImagen: z.string().min(1),
 	heroImagenAlt: z.string().min(5),
 	heroCtaTexto: z.string().min(2),
 	heroCtaUrl: z.string().min(1),
+	heroDatos: z
+		.array(z.object({ valor: z.string().min(1), etiqueta: z.string().min(1) }))
+		.max(3)
+		.default([]),
+	procesoIntro: z.string().max(240).optional(),
+	procesoPasos: z
+		.array(z.object({ titulo: z.string().min(3), descripcion: z.string().min(20) }))
+		.max(5)
+		.default([]),
+	sobreMiCita: z.string().max(320).optional(),
+	sobreMiTexto: z.string().max(400).optional(),
+	sobreMiImagen: z.string().optional(),
 	mostrarPropiedadesDestacadas: z.boolean().default(true),
 	mostrarVehiculosDestacados: z.boolean().default(true),
 	maxDestacados: z.number().int().min(2).max(9).default(3),
@@ -128,6 +149,25 @@ export type Inicio = typeof INICIO;
 export function whatsappUrl(mensaje?: string): string {
 	const base = `https://wa.me/${CONTACTO.whatsapp}`;
 	return mensaje ? `${base}?text=${encodeURIComponent(mensaje)}` : base;
+}
+
+/**
+ * Monogram for the header and footer marks.
+ *
+ * Derived from `nombreLegal` rather than reading `nombre` straight: `nombre`
+ * happens to be "LG" today, but it's a free-text field in the panel and it also
+ * feeds the `<title>` prefix and og:site_name. The day Lisbeth writes her full
+ * name there, a 46px box would be rendering a paragraph.
+ */
+export function iniciales(): string {
+	return (
+		SITIO.nombreLegal
+			.split(/\s+/)
+			.filter(Boolean)
+			.slice(0, 2)
+			.map((p) => p[0]?.toUpperCase() ?? "")
+			.join("") || SITIO.nombre.slice(0, 2).toUpperCase()
+	);
 }
 
 export function telUrl(): string {

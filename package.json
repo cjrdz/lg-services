@@ -41,6 +41,8 @@
 		"@astrojs/rss": "^4.0.19",
 		"@astrojs/sitemap": "^3.7.4",
 		"@astrojs/svelte": "9.0.1",
+		"@fontsource-variable/newsreader": "^5.3.0",
+		"@fontsource-variable/public-sans": "^5.3.0",
 		"@keystatic/astro": "^6.0.0",
 		"@keystatic/core": "^0.6.9",
 		"@tailwindcss/typography": "^0.5.20",

@@ -184,6 +184,12 @@ export default config({
 					description: "Una o dos frases. Entre 20 y 180 caracteres.",
 					validation: { isRequired: true, length: { min: 20, max: 180 } },
 				}),
+				heroEtiqueta: fields.text({
+					label: "Antetítulo",
+					description:
+						"La línea corta en mayúsculas que va arriba del titular. Ejemplo: “Ejercicio legal en El Salvador”. Si la dejás vacía, no se dibuja.",
+					validation: { isRequired: false, length: { max: 60 } },
+				}),
 				heroImagen: fields.image({
 					label: "Imagen principal",
 					description: "Se optimiza sola. Ideal: vertical, mínimo 1200 px de ancho.",
@@ -208,6 +214,80 @@ export default config({
 					defaultValue: "/contacto",
 					validation: { isRequired: true },
 				}),
+				heroDatos: fields.array(
+					fields.object({
+						valor: fields.text({
+							label: "Dato",
+							description:
+								"Corto y en palabras. Ejemplo: “Siete”, “Presencial y remoto”.",
+							validation: { isRequired: true },
+						}),
+						etiqueta: fields.text({
+							label: "Qué significa",
+							description: "Ejemplo: “áreas de práctica”, “en todo el país”.",
+							validation: { isRequired: true },
+						}),
+					}),
+					{
+						label: "Tres datos bajo el titular",
+						description:
+							"Máximo tres. Van en una fila debajo de los botones. Si la dejás vacía, esa fila no aparece.",
+						itemLabel: (p) => `${p.fields.valor.value} — ${p.fields.etiqueta.value}`,
+						validation: { length: { max: 3 } },
+					},
+				),
+
+				procesoIntro: fields.text({
+					label: "Cómo se trabaja un caso — introducción",
+					multiline: true,
+					description:
+						"Una o dos frases que acompañan a los pasos. Si no hay pasos, esta sección no se dibuja.",
+					validation: { isRequired: false, length: { max: 240 } },
+				}),
+				procesoPasos: fields.array(
+					fields.object({
+						titulo: fields.text({
+							label: "Paso",
+							description: "Ejemplo: “Primer contacto”.",
+							validation: { isRequired: true, length: { min: 3 } },
+						}),
+						descripcion: fields.text({
+							label: "En qué consiste",
+							multiline: true,
+							validation: { isRequired: true, length: { min: 20 } },
+						}),
+					}),
+					{
+						label: "Pasos del proceso",
+						description:
+							"Máximo cinco. Se numeran solos (01, 02, 03…). Si la dejás vacía, la sección completa desaparece del inicio.",
+						itemLabel: (p) => p.fields.titulo.value || "Paso",
+						validation: { length: { max: 5 } },
+					},
+				),
+
+				sobreMiCita: fields.text({
+					label: "Sobre mí — frase destacada",
+					multiline: true,
+					description:
+						"Se muestra grande, entre comillas. Escribila sin comillas: el sitio se las pone.",
+					validation: { isRequired: false, length: { max: 320 } },
+				}),
+				sobreMiTexto: fields.text({
+					label: "Sobre mí — texto",
+					multiline: true,
+					description: "Dos o tres líneas debajo de la frase.",
+					validation: { isRequired: false, length: { max: 400 } },
+				}),
+				sobreMiImagen: fields.image({
+					label: "Sobre mí — fotografía",
+					description:
+						"Opcional. Horizontal (4:3), de tu despacho o de vos trabajando. Sin ella, la frase ocupa todo el ancho.",
+					directory: "src/assets/images",
+					publicPath: "/src/assets/images/",
+					validation: { isRequired: false },
+				}),
+
 				mostrarPropiedadesDestacadas: fields.checkbox({
 					label: "Mostrar propiedades destacadas en el inicio",
 					defaultValue: true,

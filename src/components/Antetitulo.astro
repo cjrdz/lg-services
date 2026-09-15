@@ -1,0 +1,36 @@
+---
+/*
+  The small uppercase line above a heading.
+
+  It appears on the hero, on every home section, on the área pages and on the
+  listings, which is the whole reason it's a component: seven hand-rolled copies
+  of the same `text-xs font-semibold uppercase tracking-[0.14em]` drift apart
+  within a week.
+
+  The gold is `text-accent-texto`, NOT `text-accent`: this is small text (12px)
+  and gold-500 on the page background lands around 3.3:1. See the note on
+  --color-gold-700 in global.css. The RULE beside it is decoration and does use
+  the brighter gold.
+*/
+interface Props {
+	/** The 28×2px gold rule before the text. Off inside dark bands, where the
+	    text already carries enough separation. */
+	conRegla?: boolean;
+	/** Inherit the surrounding color instead of the gold — for dark bands. */
+	heredaColor?: boolean;
+	class?: string;
+}
+
+const { conRegla = true, heredaColor = false, class: clase = "" } = Astro.props;
+---
+
+<span
+	class:list={[
+		"flex items-center gap-3 text-xs font-semibold tracking-[0.14em] uppercase",
+		heredaColor ? "text-accent" : "text-accent-texto",
+		clase,
+	]}
+>
+	{conRegla && <span aria-hidden="true" class="bg-accent h-0.5 w-7 shrink-0" />}
+	<slot />
+</span>

@@ -1,0 +1,127 @@
+---
+import { getCollection } from "astro:content";
+import type { Locale } from "@/i18n/config";
+import { useTranslations } from "@/i18n";
+import { localizedUrl } from "@/i18n/routing";
+import { CONTACTO, telUrl, whatsappUrl } from "@/lib/sitio";
+import FormularioContacto from "@/components/contacto/FormularioContacto.svelte";
+
+interface Props {
+	locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const textosFormulario = {
+	nombre: t("formulario.nombre"),
+	correo: t("formulario.correo"),
+	telefono: t("formulario.telefono"),
+	asunto: t("formulario.asunto"),
+	mensaje: t("formulario.mensaje"),
+	privacidad: t("formulario.privacidad"),
+	enviar: t("formulario.enviar"),
+	enviando: t("formulario.enviando"),
+	exito: t("formulario.exito"),
+	error: t("formulario.error"),
+	whatsapp: t("common.whatsapp"),
+	privacidadPrefijo: t("formulario.privacidadPrefijo"),
+	privacidadEnlace: t("formulario.privacidadEnlace"),
+	privacidadSufijo: t("formulario.privacidadSufijo"),
+};
+
+// Without a key the widget doesn't render: the form still works via the honeypot.
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as
+	string | undefined;
+
+/*
+  Same guard as /contacto: the checkbox only links to the privacy notice when
+  that page is actually published. Asking someone to accept a document they
+  can't read isn't acceptable, least of all on a lawyer's site that collects
+  personal data.
+*/
+const paginasLegales = await getCollection("paginas", ({ data }) => !data.borrador);
+const avisoPrivacidad = paginasLegales.find((x) => x.id === "aviso-privacidad");
+const avisoPrivacidadUrl = avisoPrivacidad
+	? localizedUrl(`/legal/${avisoPrivacidad.id}`, locale)
+	: undefined;
+
+const filas = [
+	{ etiqueta: t("contacto.telefono"), valor: CONTACTO.telefono, href: telUrl() },
+	{
+		etiqueta: t("contacto.correo"),
+		valor: CONTACTO.correo,
+		href: `mailto:${CONTACTO.correo}`,
+	},
+	{ etiqueta: t("contacto.direccion"), valor: CONTACTO.direccion },
+];
+---
+
+<section>
+	<div class="contenedor grid gap-12 py-16 lg:grid-cols-2 lg:py-20">
+		<div class="revelar">
+			<h2 class="font-serif text-3xl font-normal tracking-tight sm:text-4xl">
+				{t("home.cierre.titulo")}
+			</h2>
+			<p class="text-muted-foreground mt-4 max-w-[42ch] text-[1.05rem] leading-relaxed">
+				{t("home.cierre.texto")}
+			</p>
+
+			<dl class="mt-8">
+				{
+					filas.map((f) => (
+						<div class="border-border flex justify-between gap-6 border-t py-4">
+							<dt class="text-muted-foreground shrink-0 text-xs font-semibold tracking-[0.1em] uppercase">
+								{f.etiqueta}
+							</dt>
+							<dd class="min-w-0 text-right text-[0.97rem]">
+								{f.href ? (
+									<a href={f.href} class="hover:text-primary color-animado break-all">
+										{f.valor}
+									</a>
+								) : (
+									f.valor
+								)}
+							</dd>
+						</div>
+					))
+				}
+				<div class="border-border flex justify-between gap-6 border-t border-b py-4">
+					<dt
+						class="text-muted-foreground shrink-0 text-xs font-semibold tracking-[0.1em] uppercase"
+					>
+						{t("contacto.horario")}
+					</dt>
+					<dd class="min-w-0 text-right text-[0.97rem]">
+						{
+							CONTACTO.horario.map((h) => (
+								<span class="block">
+									{h.dias} {h.horas}
+								</span>
+							))
+						}
+					</dd>
+				</div>
+			</dl>
+		</div>
+
+		{
+			/*
+		  The same island /contacto mounts, with the same props. Without JS it
+		  posts to /api/contacto, which answers 303 back to /contacto/?envio=…
+		  — that page is SSR precisely so it can read the query and show the
+		  notice, which this prerendered one couldn't.
+		*/
+		}
+		<div class="revelar border-border bg-secondary rounded-lg border p-6 sm:p-8">
+			<FormularioContacto
+				client:load
+				motivos={CONTACTO.motivosContacto}
+				textos={textosFormulario}
+				whatsapp={whatsappUrl()}
+				turnstileSiteKey={turnstileSiteKey}
+				avisoPrivacidadUrl={avisoPrivacidadUrl}
+			/>
+		</div>
+	</div>
+</section>

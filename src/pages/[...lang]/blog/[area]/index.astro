@@ -61,7 +61,7 @@ const coleccion = {
 	descripcion={copy.seoDescripcion}
 	esquemas={[coleccion, esquemaMigas(migas, site)]}
 >
-	<section class="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+	<section class="contenedor py-16 lg:py-20">
 		<nav aria-label="Migas de pan" class="text-muted-foreground mb-6 text-sm">
 			<a href={localizedUrl("/blog", locale)} class="hover:text-foreground">
 				{t("blog.titulo")}
@@ -76,12 +76,12 @@ const coleccion = {
 		}
 		<span
 			transition:name={`blog-area-icono-${area}`}
-			class="bg-secondary text-secondary-foreground mb-4 inline-flex size-12 items-center justify-center rounded-xl"
+			class="bg-secondary text-secondary-foreground mb-4 inline-flex size-12 items-center justify-center rounded-sm"
 		>
 			<Icon name={AREAS[area].icono} size={24} />
 		</span>
 
-		<h1 class="aparece font-serif text-4xl font-bold tracking-tight">
+		<h1 class="aparece font-serif text-4xl font-normal tracking-tight">
 			{t("blog.enArea", { area: copy.titulo })}
 		</h1>
 		<p class="aparece text-muted-foreground mt-3 max-w-2xl text-lg">{copy.resumen}</p>
@@ -94,7 +94,7 @@ const coleccion = {
 					))}
 				</div>
 			) : (
-				<div class="border-border bg-muted/30 mt-10 rounded-xl border border-dashed p-10 text-center">
+				<div class="border-border bg-muted/30 mt-10 rounded-lg border border-dashed p-10 text-center">
 					<p class="font-medium">{t("blog.vacio")}</p>
 					<p class="text-muted-foreground mt-1 text-sm">{t("blog.vacioAyuda")}</p>
 				</div>
@@ -109,7 +109,7 @@ const coleccion = {
 		*/
 		}
 		<div
-			class="revelar border-border bg-card mt-12 flex flex-wrap items-center justify-between gap-4 rounded-xl border p-6"
+			class="revelar border-border bg-card mt-12 flex flex-wrap items-center justify-between gap-4 rounded-lg border p-6"
 		>
 			<div>
 				<h2 class="font-semibold">{t("blog.ctaTitulo")}</h2>

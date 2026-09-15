@@ -35,7 +35,7 @@
 </script>
 
 <div class="mx-auto max-w-md px-4 py-20 text-center sm:px-6">
-	<h1 class="font-serif text-2xl font-bold tracking-tight">Estudio de fotos</h1>
+	<h1 class="font-serif text-2xl font-normal tracking-tight">Estudio de fotos</h1>
 	<p class="text-muted-foreground mt-3 text-sm">
 		Entrá con la misma cuenta de GitHub que usás para el panel.
 	</p>

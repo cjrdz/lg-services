@@ -1,0 +1,64 @@
+---
+import { LOCALES, type Locale } from "@/i18n/config";
+import { CONTACTO, telUrl } from "@/lib/sitio";
+import { ubicacionTexto } from "@/lib/geo/el-salvador";
+
+interface Props {
+	locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+/*
+  Hours as one line: "Lun a vie 8:00 a.m. – 5:00 p.m. · Sáb 9:00 a.m. – 12:00 m."
+  Built from the same `horario` array the footer and /contacto read, so there's
+  one place to edit it in the panel.
+*/
+const horario = CONTACTO.horario.map((h) => `${h.dias} ${h.horas}`).join(" · ");
+
+// Not CONTACTO.direccion: that's the full postal line and it's too long here.
+const ubicacion = ubicacionTexto(CONTACTO.departamento, CONTACTO.distrito);
+---
+
+{
+	/*
+	  Deliberately NOT sticky. What has to stay reachable while reading is the
+	  navigation; hours and a phone number pinned to the top of every scroll is
+	  a banner, not a utility.
+
+	  Hidden below md: on a phone this is four lines of chrome above the logo,
+	  and both the number and the hours are one tap away in the footer.
+	*/
+}
+{
+	/*
+	  `bg-banda`, NOT `bg-primary`. In dark mode --primary inverts to a LIGHT
+	  blue so buttons stay legible on a dark page — which turned this strip into
+	  a bright band across the top of every page. The band tokens are the ones
+	  that stay dark in both themes, and it shares them with the process
+	  section so the two read as the same material.
+	*/
+}
+<div class="bg-banda text-banda-foreground hidden text-[13px] md:block">
+	<div
+		class="contenedor flex flex-wrap items-center justify-between gap-x-7 gap-y-1 py-2.5"
+	>
+		<span>{ubicacion} · {horario}</span>
+
+		<span class="flex items-center gap-5">
+			<a
+				href={telUrl()}
+				class="text-banda-titulo tabular-nums transition-opacity hover:opacity-80"
+			>
+				{CONTACTO.telefono}
+			</a>
+			{
+				/*
+			  The language indicator only exists once there's something to switch
+			  to. With LOCALES = ["es"] it would be a button that does nothing.
+			*/
+			}
+			{LOCALES.length > 1 && <span class="uppercase">{locale}</span>}
+		</span>
+	</div>
+</div>

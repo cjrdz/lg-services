@@ -8,7 +8,11 @@
 	let { items }: Props = $props();
 </script>
 
-<div class="space-y-4">
+<!--
+	No gap between items: they're rows of one list sharing a hairline, not
+	separate cards. Each row draws its own bottom border.
+-->
+<div>
 	{#each items as item (item.pregunta)}
 		<AcordeonFaq pregunta={item.pregunta} respuesta={item.respuesta} />
 	{/each}

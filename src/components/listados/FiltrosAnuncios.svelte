@@ -344,8 +344,8 @@
 </script>
 
 <div class="grid gap-8 lg:grid-cols-[16rem_1fr]">
-	<aside class="lg:sticky lg:top-20 lg:self-start">
-		<div class="border-border bg-card rounded-xl border">
+	<aside class="lg:sticky lg:top-24 lg:self-start">
+		<div class="border-border bg-card rounded-lg border">
 			<div class="flex flex-wrap items-center justify-between gap-2 p-4">
 				<h2 class="font-semibold">
 					{textos.titulo}
@@ -513,7 +513,7 @@
 
 		{#if filtradas.length === 0}
 			<div
-				class="border-border bg-muted/30 rounded-xl border border-dashed p-10 text-center"
+				class="border-border bg-muted/30 rounded-lg border border-dashed p-10 text-center"
 			>
 				<p class="font-medium">{textos.sinResultados}</p>
 				<p class="text-muted-foreground mt-1 text-sm">{textos.sinResultadosAyuda}</p>

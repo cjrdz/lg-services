@@ -1,0 +1,132 @@
+---
+import Antetitulo from "@/components/Antetitulo.astro";
+
+interface Props {
+	etiqueta?: string;
+	titulo: string;
+	subtitulo: string;
+	ctaTexto: string;
+	ctaUrl: string;
+	ctaSecundarioTexto: string;
+	ctaSecundarioUrl: string;
+	datos: ReadonlyArray<{ valor: string; etiqueta: string }>;
+}
+
+const {
+	etiqueta,
+	titulo,
+	subtitulo,
+	ctaTexto,
+	ctaUrl,
+	ctaSecundarioTexto,
+	ctaSecundarioUrl,
+	datos,
+}: Props = Astro.props;
+---
+
+{
+	/*
+	  A split band, not a centered card.
+
+	  The previous hero was a text column beside a small rounded portrait, with
+	  two radial brand gradients filling the space left over. Here the portrait
+	  IS the right half, full height, with a hairline down its left side — so
+	  there's no empty field to light up and nothing decorative to animate.
+
+	  It sits inside `.contenedor` rather than bleeding to the viewport edge on
+	  purpose: a full-bleed column would have to be aligned with
+	  `calc((100vw - 80rem) / 2)`, and `100vw` includes the scrollbar, which is
+	  how a page ends up 15px wider than the screen on Windows. Stopping at the
+	  same measure as every other band is also what makes the hairline grid
+	  read as one system.
+
+	  No island here. The entrance is `.hero-animable*` — pure CSS with
+	  @starting-style — and the pointer parallax is gone: a portrait that
+	  follows the cursor is exactly the movement this redesign removes.
+	*/
+}
+<section class="border-border border-b">
+	<div class="contenedor">
+		<div class="grid lg:grid-cols-[1.15fr_1fr]">
+			<div class="flex flex-col items-start gap-6 py-14 lg:py-20 lg:pr-12">
+				{
+					etiqueta && (
+						<Antetitulo class="hero-animable hero-animable-titulo">
+							{etiqueta}
+						</Antetitulo>
+					)
+				}
+
+				<h1
+					class="hero-animable hero-animable-titulo font-serif text-[2.5rem] leading-[1.07] font-normal tracking-tight text-balance sm:text-5xl lg:text-[3.4rem]"
+				>
+					{titulo}
+				</h1>
+
+				<p
+					class="hero-animable hero-animable-subtitulo text-muted-foreground max-w-[46ch] text-lg leading-relaxed text-pretty"
+				>
+					{subtitulo}
+				</p>
+
+				<div class="hero-animable hero-animable-botones flex flex-wrap gap-3">
+					<a
+						href={ctaUrl}
+						class="bg-primary text-primary-foreground hover:bg-primary/90 color-animado rounded-lg px-7 py-4 text-[0.97rem] font-semibold"
+					>
+						{ctaTexto}
+					</a>
+					{
+						/*
+					  WhatsApp as the secondary, not "ver servicios": in El
+					  Salvador it's the channel people actually use to make
+					  first contact.
+					*/
+					}
+					<a
+						href={ctaSecundarioUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="border-border text-primary hover:border-primary/50 hover:bg-secondary color-animado rounded-lg border px-7 py-4 text-[0.97rem] font-semibold"
+					>
+						{ctaSecundarioTexto}
+					</a>
+				</div>
+
+				{
+					datos.length > 0 && (
+						<dl class="border-border hero-animable hero-animable-datos mt-3 grid w-full grid-rows-[auto_auto] gap-x-6 gap-y-5 border-t pt-6 sm:grid-cols-3">
+							{/*
+							  `grid-rows-subgrid` so the three labels sit on one line even
+							  when a value wraps to two — and one will, since these are free
+							  text from the panel and "Presencial y remoto" is not the length
+							  of "Siete".
+							*/}
+							{datos.map((d) => (
+								<div class="row-span-2 grid min-w-0 grid-rows-subgrid gap-1">
+									<dt class="text-primary font-serif text-2xl leading-tight text-balance">
+										{d.valor}
+									</dt>
+									<dd class="text-muted-foreground text-sm">{d.etiqueta}</dd>
+								</div>
+							))}
+						</dl>
+					)
+				}
+			</div>
+
+			{
+				/*
+			  `.retrato-velo` lays the brand veil over this box and
+			  `.retrato-neutro` (on the <img>, passed in by the page)
+			  desaturates the magenta backdrop of the photo itself.
+			*/
+			}
+			<div
+				class="border-border retrato-velo hero-animable-imagen bg-muted relative min-h-[24rem] overflow-hidden border-t lg:min-h-[34rem] lg:border-t-0 lg:border-l"
+			>
+				<slot name="imagen" />
+			</div>
+		</div>
+	</div>
+</section>

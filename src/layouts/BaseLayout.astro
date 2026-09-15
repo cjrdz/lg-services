@@ -5,9 +5,22 @@ import { ClientRouter } from "astro:transitions";
 import { canonical, hreflangs } from "@/lib/seo";
 import { SITIO } from "@/lib/sitio";
 import { POLITICA_MOVIMIENTO } from "@/lib/motion";
+import BarraSuperior from "@/components/layout/BarraSuperior.astro";
 import Navbar from "@/components/layout/Navbar.astro";
 import Footer from "@/components/layout/Footer.astro";
 import "@/styles/global.css";
+
+/*
+  The <h1> of every page is set in the serif, so on the home it IS the LCP
+  element. Discovering that font only after the CSS parses costs a round trip;
+  preloading the latin subset hides it. Only latin — the other subsets are
+  behind a unicode-range the Spanish copy never triggers.
+
+  The ?url import is what gives us the hashed, fingerprinted path instead of a
+  node_modules path that wouldn't survive the build.
+*/
+import serifWoff2 from "@fontsource-variable/newsreader/files/newsreader-latin-wght-normal.woff2?url";
+import sansWoff2 from "@fontsource-variable/public-sans/files/public-sans-latin-wght-normal.woff2?url";
 
 interface Props {
 	locale: Locale;
@@ -61,6 +74,9 @@ const esquemasValidos = esquemas.filter(
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="generator" content={Astro.generator} />
+
+		<link rel="preload" as="font" type="font/woff2" href={serifWoff2} crossorigin />
+		<link rel="preload" as="font" type="font/woff2" href={sansWoff2} crossorigin />
 
 		<title>{tituloCompleto}</title>
 		<meta name="description" content={descripcion} />
@@ -159,6 +175,7 @@ const esquemasValidos = esquemas.filter(
 			{t("nav.irAlContenido")}
 		</a>
 
+		<BarraSuperior locale={locale} />
 		<Navbar locale={locale} />
 
 		<main id="contenido" class="flex-1">

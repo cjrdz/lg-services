@@ -247,8 +247,8 @@
 	}
 </script>
 
-<div class="mx-auto max-w-4xl px-4 py-10 sm:px-6">
-	<h1 class="font-serif text-3xl font-bold tracking-tight">Estudio de fotos</h1>
+<div class="contenedor max-w-4xl py-10">
+	<h1 class="font-serif text-3xl font-normal tracking-tight">Estudio de fotos</h1>
 	<p class="text-muted-foreground mt-2">
 		Subí las fotos acá y después pegá la ruta en el panel, en la galería del anuncio.
 	</p>
@@ -262,7 +262,7 @@
 	{/if}
 
 	<!-- 1. Where do they go -->
-	<section class="border-border bg-card mt-8 rounded-xl border p-5">
+	<section class="border-border bg-card mt-8 rounded-lg border p-5">
 		<h2 class="font-semibold">1. ¿A qué anuncio pertenecen?</h2>
 		<div class="mt-4 grid gap-4 sm:grid-cols-2">
 			<label class="block">
@@ -307,7 +307,7 @@
 		<div
 			ondragover={(e) => e.preventDefault()}
 			ondrop={alSoltar}
-			class="border-border mt-3 rounded-xl border-2 border-dashed p-8 text-center transition-colors"
+			class="border-border mt-3 rounded-lg border-2 border-dashed p-8 text-center transition-colors"
 			class:opacity-50={!listo}
 		>
 			<p class="text-muted-foreground text-sm">
@@ -473,7 +473,7 @@
 	{/if}
 
 	<!-- 3. What to do next -->
-	<section class="border-border bg-muted/30 mt-10 rounded-xl border p-5">
+	<section class="border-border bg-muted/30 mt-10 rounded-lg border p-5">
 		<h2 class="font-semibold">3. Ahora pegá las rutas en el panel</h2>
 		<ol class="text-muted-foreground mt-3 list-decimal space-y-1 pl-5 text-sm">
 			<li>Abrí el panel y entrá al anuncio.</li>

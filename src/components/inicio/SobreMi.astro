@@ -1,0 +1,82 @@
+---
+import type { Locale } from "@/i18n/config";
+import { useTranslations } from "@/i18n";
+import { SITIO } from "@/lib/sitio";
+import Antetitulo from "@/components/Antetitulo.astro";
+import ImagenLocal from "@/components/ImagenLocal.astro";
+
+interface Props {
+	locale: Locale;
+	cita?: string;
+	texto?: string;
+	imagen?: string;
+}
+
+const { locale, cita, texto, imagen } = Astro.props;
+const t = useTranslations(locale);
+
+const hayContenido = Boolean(cita || texto);
+---
+
+{
+	/*
+	  The photo is optional and the layout answers to that.
+
+	  Lisbeth doesn't have a usable 4:3 photo of her office yet, and the three
+	  `_reserva/office*.jpg` in the repo are stock with a different stranger in
+	  each one — putting those up as "her practice" is precisely what makes a
+	  site look like a template. So with no image the quote simply takes the
+	  full measure. No dashed "pending" box ships to production.
+	*/
+}
+{
+	hayContenido && (
+		<section class="border-border border-b">
+			<div
+				class:list={[
+					"contenedor grid items-center gap-12 py-16 lg:py-20",
+					imagen && "lg:grid-cols-[1fr_1.1fr]",
+				]}
+			>
+				{imagen && (
+					<div class="border-border retrato-velo bg-muted revelar relative overflow-hidden border">
+						<ImagenLocal
+							src={imagen}
+							alt={`${SITIO.nombreLegal}, ${SITIO.profesion.toLowerCase()}`}
+							contexto="sobreMiImagen de src/data/inicio/index.json"
+							ratio="4 / 3"
+							sizes="(min-width: 1024px) 34rem, 92vw"
+							class="retrato-neutro"
+						/>
+					</div>
+				)}
+
+				<div class="revelar">
+					<Antetitulo>{t("home.sobreMi.antetitulo")}</Antetitulo>
+
+					{cita && (
+						<blockquote class="mt-5 max-w-[24ch] font-serif text-[1.75rem] leading-snug font-normal text-pretty sm:max-w-[30ch] sm:text-[1.9rem]">
+							«{cita}»
+						</blockquote>
+					)}
+
+					{texto && (
+						<p class="text-muted-foreground mt-6 max-w-[48ch] text-[1.05rem] leading-relaxed">
+							{texto}
+						</p>
+					)}
+
+					{/* Only rendered once she fills it in — an empty label is worse than none. */}
+					{SITIO.numeroAbogada && (
+						<p class="text-muted-foreground mt-6 text-sm">
+							<span class="text-foreground font-medium">
+								{t("home.sobreMi.autorizacion")}
+							</span>{" "}
+							<span class="tabular-nums">{SITIO.numeroAbogada}</span>
+						</p>
+					)}
+				</div>
+			</div>
+		</section>
+	)
+}

@@ -1,24 +1,23 @@
 ---
-import { localePaths } from "@/i18n/routing";
-import { localizedUrl } from "@/i18n/routing";
+import { localePaths, localizedUrl } from "@/i18n/routing";
 import { useTranslations } from "@/i18n";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import Icon from "@/components/Icon.astro";
 import ImagenLocal from "@/components/ImagenLocal.astro";
-import Hero from "@/components/Hero.astro";
-import { INICIO } from "@/lib/sitio";
-import { areasOrdenadas } from "@/lib/taxonomia";
+import Hero from "@/components/inicio/Hero.astro";
+import AreasPractica from "@/components/inicio/AreasPractica.astro";
+import Proceso from "@/components/inicio/Proceso.astro";
+import SobreMi from "@/components/inicio/SobreMi.astro";
+import Modulos from "@/components/inicio/Modulos.astro";
+import CierreContacto from "@/components/inicio/CierreContacto.astro";
+import { INICIO, whatsappUrl } from "@/lib/sitio";
 import { esquemaNegocio, esquemaSitioWeb } from "@/lib/seo";
 import { getTarjetasPropiedades, getTarjetasVehiculos } from "@/lib/anuncios";
-import Destacados from "@/components/anuncios/Destacados.astro";
 
 export const getStaticPaths = localePaths;
 
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 const site = Astro.site ?? new URL("https://gutierrezgroup.blog");
-
-const areas = areasOrdenadas(locale);
 
 const destacadas: import("@/lib/anuncios-tipos").TarjetaAnuncio[] = [];
 if (INICIO.mostrarPropiedadesDestacadas) {
@@ -35,6 +34,17 @@ const destacados = destacadas
 	.slice(0, INICIO.maxDestacados);
 ---
 
+{
+	/*
+	  The home reads as one document: full-bleed bands stacked and separated by
+	  a hairline, all of them aligned on the same measure via `.contenedor`.
+
+	  Order is an argument. Who she is and what she does → what she handles →
+	  how a case actually runs → who's behind it → the secondary verticals →
+	  how to reach her. The patrimonial modules come after the practice because
+	  they ARE secondary to it.
+	*/
+}
 <BaseLayout
 	locale={locale}
 	titulo={t("nav.inicio")}
@@ -42,91 +52,39 @@ const destacados = destacadas
 	esquemas={[esquemaNegocio(site), esquemaSitioWeb(site)]}
 >
 	<Hero
+		etiqueta={INICIO.heroEtiqueta}
 		titulo={INICIO.heroTitulo}
 		subtitulo={INICIO.heroSubtitulo}
 		ctaTexto={INICIO.heroCtaTexto}
 		ctaUrl={localizedUrl(INICIO.heroCtaUrl, locale)}
-		ctaSecundarioTexto={t("home.heroCtaSecundario")}
-		ctaSecundarioUrl={localizedUrl("/servicios", locale)}
+		ctaSecundarioTexto={t("common.whatsapp")}
+		ctaSecundarioUrl={whatsappUrl()}
+		datos={INICIO.heroDatos}
 	>
 		<ImagenLocal
 			slot="imagen"
 			src={INICIO.heroImagen}
 			alt={INICIO.heroImagenAlt}
 			contexto="heroImagen de src/data/inicio/index.json"
-			ratio="3 / 4"
-			sizes="(min-width: 1024px) 28rem, (min-width: 640px) 24rem, 90vw"
+			sizes="(min-width: 1024px) 34rem, 100vw"
 			loading="eager"
 			fetchpriority="high"
-			class="object-top"
+			class="retrato-neutro absolute inset-0 size-full object-cover object-[50%_18%]"
 		/>
 	</Hero>
 
-	<section class="mx-auto max-w-6xl px-4 pt-16 pb-20 sm:px-6">
-		<div class="revelar mb-8 flex flex-wrap items-end justify-between gap-4">
-			<div>
-				<h2 class="font-serif text-3xl font-bold tracking-tight">
-					{t("home.seccionServicios")}
-				</h2>
-				<p class="text-muted-foreground mt-2">{t("home.seccionServiciosTexto")}</p>
-			</div>
-			<a
-				href={localizedUrl("/servicios", locale)}
-				class="border-border bg-card hover:border-primary/40 hover:text-primary group elevable inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium"
-			>
-				{t("home.verTodasLasAreas")}
-				<Icon name="lucide:arrow-right" size={15} class="flecha-desliza" />
-			</a>
-		</div>
+	<AreasPractica locale={locale} />
 
-		<div class="revelar-grupo grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-			{
-				areas.map((area) => (
-					<a
-						href={localizedUrl(`/servicios/${area.id}`, locale)}
-						class="border-border bg-card hover:border-primary/40 group elevable relative rounded-xl border p-5"
-					>
-						{/*
-						  Shared name with the same tile on the service page: the
-						  browser morphs one into the other during the view
-						  transition instead of cross-fading the whole page.
-						*/}
-						<span
-							transition:name={`area-icono-${area.id}`}
-							class="bg-secondary text-secondary-foreground group-hover:bg-primary group-hover:text-primary-foreground color-animado mb-3 inline-flex size-10 items-center justify-center rounded-lg"
-						>
-							<Icon name={area.icono} size={20} />
-						</span>
-						<h3 class="group-hover:text-primary font-semibold transition-colors">
-							{area.titulo}
-						</h3>
-						<p class="text-muted-foreground mt-1 text-sm">{area.resumen}</p>
-						<Icon
-							name="lucide:arrow-right"
-							size={16}
-							class="text-primary flecha-tarjeta absolute right-4 bottom-4"
-						/>
-					</a>
-				))
-			}
-		</div>
-	</section>
+	<Proceso locale={locale} intro={INICIO.procesoIntro} pasos={INICIO.procesoPasos} />
 
-	{
-		destacados.length > 0 && (
-			<Destacados
-				tarjetas={destacados}
-				textos={{
-					titulo: t("home.destacados.titulo"),
-					descripcion: t("home.destacados.descripcion"),
-					verPropiedades: localizedUrl("/propiedades", locale),
-					verVehiculos: localizedUrl("/vehiculos", locale),
-					etiquetaPropiedades: t("home.destacados.verPropiedades"),
-					etiquetaVehiculos: t("home.destacados.verVehiculos"),
-					sinFoto: t("common.sinFoto"),
-					consultarPrecio: t("propiedades.consultarPrecio"),
-				}}
-			/>
-		)
-	}
+	<SobreMi
+		locale={locale}
+		cita={INICIO.sobreMiCita}
+		texto={INICIO.sobreMiTexto}
+		imagen={INICIO.sobreMiImagen}
+	/>
+
+	<Modulos locale={locale} destacados={destacados} />
+
+	<CierreContacto locale={locale} />
 </BaseLayout>

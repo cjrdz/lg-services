@@ -45,7 +45,7 @@ const minutos = tiempoLectura(entrada.body ?? "");
 */
 }
 <article
-	class="border-border bg-card hover:border-primary/40 group elevable relative flex min-w-0 flex-col rounded-xl border p-5"
+	class="border-border bg-card hover:border-primary/40 group elevable relative flex min-w-0 flex-col rounded-lg border p-5"
 >
 	<div class="flex items-center gap-2">
 		{
@@ -56,7 +56,7 @@ const minutos = tiempoLectura(entrada.body ?? "");
 		}
 		<span
 			transition:name={transicionEntrada(entrada.id)}
-			class="bg-secondary text-secondary-foreground group-hover:bg-primary group-hover:text-primary-foreground color-animado inline-flex size-8 shrink-0 items-center justify-center rounded-lg"
+			class="bg-secondary text-secondary-foreground group-hover:bg-primary group-hover:text-primary-foreground color-animado inline-flex size-8 shrink-0 items-center justify-center rounded-sm"
 		>
 			<Icon name={AREAS[d.area].icono} size={16} />
 		</span>
@@ -85,7 +85,7 @@ const minutos = tiempoLectura(entrada.body ?? "");
 	</div>
 
 	<h3
-		class="group-hover:text-primary mt-3 font-semibold text-balance transition-colors"
+		class="group-hover:text-primary color-animado mt-3 font-serif text-[1.15rem] leading-snug font-medium text-balance"
 	>
 		<a href={href} class="after:absolute after:inset-0">{d.titulo}</a>
 	</h3>

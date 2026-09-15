@@ -11,6 +11,7 @@
 		"vehiculos": "Vehículos",
 		"blog": "Blog",
 		"contacto": "Contacto",
+		"agendar": "Agendar consulta",
 		"sobreMi": "Sobre mí",
 		"abrirMenu": "Abrir menú",
 		"cerrarMenu": "Cerrar menú",
@@ -52,6 +53,26 @@
 			"descripcion": "Propiedades y vehículos seleccionados.",
 			"verPropiedades": "Ver todas las propiedades",
 			"verVehiculos": "Ver todos los vehículos"
+		},
+		"proceso": {
+			"antetitulo": "Cómo se trabaja un caso",
+			"titulo": "Tres pasos, sin sorpresas en el camino."
+		},
+		"sobreMi": {
+			"antetitulo": "Sobre mí",
+			"autorizacion": "N.º de autorización"
+		},
+		"modulos": {
+			"titulo": "También gestionamos",
+			"nota": "Servicios patrimoniales, secundarios a la asesoría legal",
+			"propiedades": "Propiedades y terrenos",
+			"propiedadesTexto": "Venta y alquiler, con la documentación legal revisada de principio a fin.",
+			"vehiculos": "Vehículos en alquiler",
+			"vehiculosTexto": "Por día, semana o mes, con contrato y requisitos claros desde el inicio."
+		},
+		"cierre": {
+			"titulo": "Contanos tu caso.",
+			"texto": "La primera conversación sirve para ubicar el problema y decirte con honestidad si tiene sentido seguir adelante."
 		}
 	},
 	"servicios": {
@@ -61,7 +82,12 @@
 		"incluye": "Qué incluye",
 		"faq": "Preguntas frecuentes",
 		"honorariosDesde": "Desde {monto}",
-		"otrasAreas": "Otras áreas de práctica"
+		"otrasAreas": "Otras áreas de práctica",
+		"areaNumero": "Área de práctica {n}",
+		"subtemas": "Subtemas",
+		"agendarTitulo": "Agendar una consulta",
+		"agendarTexto": "Respuesta el mismo día hábil. Atención presencial en San Salvador o remota.",
+		"irAlFormulario": "Ir al formulario"
 	},
 	"propiedades": {
 		"titulo": "Propiedades",

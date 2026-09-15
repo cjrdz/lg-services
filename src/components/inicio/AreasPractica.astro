@@ -1,0 +1,100 @@
+---
+import type { Locale } from "@/i18n/config";
+import { useTranslations } from "@/i18n";
+import { localizedUrl } from "@/i18n/routing";
+import { areasOrdenadas } from "@/lib/taxonomia";
+import Icon from "@/components/Icon.astro";
+
+interface Props {
+	locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+/*
+  Three with a summary, four in a compact index — not seven identical tiles.
+
+  A grid of seven equal cards says "we don't know which of these matters". The
+  order in taxonomia.ts already answers that, so the first three get room to
+  explain themselves and the rest become a directory.
+*/
+const areas = areasOrdenadas(locale);
+const destacadas = areas.slice(0, 3);
+const resto = areas.slice(3);
+---
+
+<section class="border-border border-b">
+	<div class="contenedor py-16 lg:py-20">
+		<div class="revelar mb-9 flex flex-wrap items-end justify-between gap-5">
+			<div>
+				<h2 class="font-serif text-3xl font-normal tracking-tight sm:text-4xl">
+					{t("home.seccionServicios")}
+				</h2>
+				<p class="text-muted-foreground mt-2 max-w-[52ch]">
+					{t("home.seccionServiciosTexto")}
+				</p>
+			</div>
+			<a
+				href={localizedUrl("/servicios", locale)}
+				class="border-border hover:border-primary group text-primary color-animado inline-flex items-center gap-2 border-b pb-1 text-[0.95rem] font-semibold"
+			>
+				{t("home.verTodasLasAreas")}
+				<Icon name="lucide:arrow-right" size={15} class="flecha-desliza" />
+			</a>
+		</div>
+
+		{
+			/*
+		  No icons here, on purpose. Seven lucide glyphs of the same weight
+		  distinguish nothing and are the visual signature of a template; the
+		  hierarchy is carried by type. The `area-icono-*` morph keeps its
+		  origin on /servicios/, where the badge still earns its place.
+		*/
+		}
+		<div class="rejilla-hilo revelar-grupo sm:grid-cols-2 lg:grid-cols-3">
+			{
+				destacadas.map((area, i) => (
+					<a
+						href={localizedUrl(`/servicios/${area.id}`, locale)}
+						class="bg-card hover:bg-secondary group elevable relative flex min-h-[14rem] flex-col gap-3 p-7"
+					>
+						<span class="text-accent-texto font-mono text-[0.72rem] tracking-[0.1em]">
+							{String(i + 1).padStart(2, "0")}
+						</span>
+						<h3 class="text-primary font-serif text-[1.4rem] leading-tight font-medium">
+							{area.titulo}
+						</h3>
+						<p class="text-muted-foreground text-[0.95rem] leading-relaxed">
+							{area.resumen}
+						</p>
+						<span class="text-primary mt-auto pt-3 text-sm font-semibold">
+							{t("common.verDetalle")}
+						</span>
+						<Icon
+							name="lucide:arrow-right"
+							size={16}
+							class="text-primary flecha-tarjeta absolute right-6 bottom-6"
+						/>
+					</a>
+				))
+			}
+		</div>
+
+		<div class="rejilla-hilo revelar border-t-0 sm:grid-cols-2 lg:grid-cols-4">
+			{
+				resto.map((area) => (
+					<a
+						href={localizedUrl(`/servicios/${area.id}`, locale)}
+						class="bg-secondary hover:bg-card group elevable flex min-w-0 flex-col gap-1 p-5"
+					>
+						<span class="text-primary group-hover:text-primary min-w-0 text-[0.97rem] font-semibold">
+							{area.titulo}
+						</span>
+						<span class="text-muted-foreground min-w-0 text-sm">{area.resumen}</span>
+					</a>
+				))
+			}
+		</div>
+	</div>
+</section>
