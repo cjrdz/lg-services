@@ -164,6 +164,18 @@ error en consola. Ahora el estado oculto vive en el keyframe y todo está dentro
 de `@supports (animation-timeline: view())`, así que un navegador sin
 animaciones por scroll simplemente muestra el contenido.
 
+**Excepción: los pasos de `Proceso` sí usan GSAP.** `animation-timeline:
+view()` solo existe en Chrome/Edge 115+ y Safari 18.4+ (Firefox no), y ahí la
+secuencia 01→02→03 tiene que leerse en todos lados. Los pasos son la isla
+`ProcesoPasos.svelte` con ScrollTrigger (`start: "top 82%"`, stagger 0.22s,
+`DURACION_ENTRADA`). El estado oculto vive en `.js .proceso-pasos > li` —
+escondidos ANTES del primer paint, porque si el HTML sale visible y GSAP lo
+esconde al cargar, el usuario ve los pasos "desaparecer" y volver: un glitch,
+no una entrada. El modo de falla se cubre al revés: si el chunk no baja o hay
+movimiento reducido (`cargarGsap()` devuelve `null`), la isla agrega
+`.gsap-fallo` y el CSS los devuelve con un fundido suave; sin JavaScript no
+hay `.js` y el contenido simplemente está ahí.
+
 Dos detalles que no se pueden tocar sin romperlo:
 
 - Anima `transform`, **no** `translate`: `translate` es de `.elevable` para su
