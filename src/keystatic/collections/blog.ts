@@ -15,7 +15,12 @@ export const blog = collection({
 	slugField: "titulo",
 	entryLayout: "content",
 	previewUrl: "/blog/{slug}/",
-	columns: ["titulo", "publicado", "borrador"],
+	/*
+	  `area` en la lista de entradas: es como se organiza el blog y sin esa
+	  columna la unica forma de ver de que area es un articulo era abrirlo.
+	  Keystatic no ofrece filtros, asi que la columna es lo que hay.
+	*/
+	columns: ["titulo", "area", "publicado", "borrador"],
 	format: { contentField: "cuerpo" },
 	schema: {
 		titulo: fields.slug({
@@ -27,7 +32,7 @@ export const blog = collection({
 			slug: {
 				label: "Dirección web (área/nombre)",
 				description:
-					"Formato: area/nombre-del-articulo — por ejemplo derecho-laboral/despido-injustificado. La primera parte tiene que coincidir con el área de abajo.",
+					"Formato: area/nombre-del-articulo — por ejemplo derecho-laboral/despido-injustificado. La primera parte tiene que ser EXACTAMENTE el área que elijas abajo: si no coinciden, el sitio no se publica y queda en línea la versión anterior.",
 				validation: {
 					pattern: {
 						regex: /^[a-z0-9-]+\/[a-z0-9-]+$/,
@@ -44,6 +49,8 @@ export const blog = collection({
 		}),
 		subtema: fields.select({
 			label: "Subtema (opcional)",
+			description:
+				"Tiene que ser un subtema DEL ÁREA que elegiste arriba — cada opción lleva su área adelante. Si no calza, el sitio no se publica.",
 			options: opcionesSubtemas,
 			defaultValue: "",
 		}),

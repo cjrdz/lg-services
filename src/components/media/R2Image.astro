@@ -1,6 +1,7 @@
 ---
 import { r2Srcset, r2Url } from "@/lib/media/r2";
 import { ANCHOS_GALERIA } from "@/lib/media/keys";
+import Icon from "@/components/Icon.astro";
 
 /**
  * A listing's photo, served from R2.
@@ -17,6 +18,24 @@ import { ANCHOS_GALERIA } from "@/lib/media/keys";
  *
  * For REPO images (portrait, office) use <ImagenLocal> instead, which does
  * go through astro:assets.
+ *
+ * SIN BUCKET CONFIGURADO, ESTO DIBUJA UN PLACEHOLDER, NO NADA.
+ *
+ * `r2Url()` devuelve `""` cuando `PUBLIC_MEDIA_BASE_URL` no está puesta —
+ * pasa en desarrollo siempre, y puede pasar en producción a medio configurar
+ * (ver SETUP-R2.md). La versión anterior de este componente, con solo
+ * `{fallback && <img/>}`, no renderizaba NADA en ese caso: ni una caja, ni el
+ * `<img>`. En una galería (`grid grid-cols-2 md:grid-cols-4`), eso es una
+ * `<figure>` de alto CERO — un hueco invisible en la grilla, sin ninguna
+ * pista de que ahí falta una foto. Encontrado con Playwright inyectando el
+ * markup real: el elemento medía 0×0 mientras el `<figure>` que lo envuelve
+ * seguía ocupando su columna.
+ *
+ * `<TarjetaAnuncio>` (la tarjeta de listado) ya resolvía esto con su propio
+ * `{#if}/{:else}` — un cuadro del tamaño correcto con el texto "Sin foto".
+ * Esto hace lo mismo acá, para que los dos componentes de imagen del sitio
+ * fallen de la misma manera: el `aspect-ratio` se aplica igual en los dos
+ * casos, así que la grilla nunca colapsa, tenga foto o no.
  */
 interface Props {
 	src: string;
@@ -26,6 +45,12 @@ interface Props {
 	ratio?: string;
 	loading?: "lazy" | "eager";
 	fetchpriority?: "high" | "low" | "auto";
+	/**
+	 * `view-transition-name` de esta foto. En la ficha de un anuncio va la
+	 * portada, para que la foto de la tarjeta crezca hasta acá en vez de que
+	 * la página corte. Ver `transicionFoto()` en src/lib/formato.ts.
+	 */
+	transicion?: string;
 	class?: string;
 }
 
@@ -37,15 +62,23 @@ const {
 	ratio = "4 / 3",
 	loading = "lazy",
 	fetchpriority = "auto",
+	transicion,
 	class: className,
 } = Astro.props;
 
 const mayor = anchos[anchos.length - 1];
 const fallback = r2Url(src, mayor);
+
+const estilo = [
+	`aspect-ratio:${ratio}`,
+	transicion && `view-transition-name:${transicion}`,
+]
+	.filter(Boolean)
+	.join(";");
 ---
 
 {
-	fallback && (
+	fallback ? (
 		<img
 			src={fallback}
 			srcset={r2Srcset(src, anchos)}
@@ -54,8 +87,18 @@ const fallback = r2Url(src, mayor);
 			loading={loading}
 			decoding="async"
 			fetchpriority={fetchpriority}
-			style={`aspect-ratio:${ratio}`}
+			style={estilo}
 			class:list={["bg-muted h-full w-full object-cover", className]}
 		/>
+	) : (
+		<div
+			style={estilo}
+			class:list={[
+				"bg-muted text-muted-foreground flex w-full items-center justify-center",
+				className,
+			]}
+		>
+			<Icon name="lucide:image-off" size={28} label={alt} />
+		</div>
 	)
 }

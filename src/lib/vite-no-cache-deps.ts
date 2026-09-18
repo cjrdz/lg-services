@@ -40,9 +40,33 @@ export function noCachearEnDev(): Plugin {
 				  middleware runs AFTER and overwrites it. That's why `setHeader`
 				  gets intercepted below, at the last point before the response goes out.
 				*/
+				/*
+				  Todo `/node_modules/`, no solo `/node_modules/.vite/deps/`.
+
+				  Los bundles pre-optimizados no son los únicos que llevan los
+				  `?v=` adentro. El punto de entrada del renderer de Svelte
+				  —`/node_modules/@astrojs/svelte/dist/client.svelte.js`, que es
+				  lo que carga cada isla— es un módulo servido por Vite con los
+				  imports ya reescritos, y ese archivo lo devolvía con:
+
+				      Cache-Control: max-age=31536000,immutable
+				      Etag: W/"8bb-..."
+
+				  …teniendo adentro `deps/svelte_internal_client.js?v=17432291`.
+				  O sea: el navegador se guardaba UN AÑO un archivo que apunta al
+				  hash de esta corrida del optimizador. En cuanto Vite
+				  re-optimiza, ese hash deja de existir y la consola se llena de
+
+				      GET .../svelte_internal_client.js?v=<viejo>
+				      net::ERR_ABORTED 504 (Outdated Optimize Dep)
+
+				  Es la misma familia de fallo que el 304 de abajo, por una
+				  puerta que este plugin no estaba mirando. Comprobado con curl
+				  contra el servidor de desarrollo, no deducido.
+				*/
 				const u = req.url ?? "";
 				const esDeVite =
-					u.includes("/node_modules/.vite/deps/") ||
+					u.startsWith("/node_modules/") ||
 					u.startsWith("/src/") ||
 					u.startsWith("/@id/") ||
 					u.startsWith("/@fs/") ||

@@ -25,6 +25,40 @@ export function transicionEntrada(id: string): string {
 	return `entrada-icono-${slugDe(id).replace(/\//g, "-")}`;
 }
 
+/**
+ * El área que la DIRECCIÓN de una entrada dice que tiene.
+ *
+ * El área de una publicación está escrita dos veces: en el prefijo del slug
+ * ("derecho-laboral/despido-injustificado") y en el campo `area` del panel.
+ * La URL sale del prefijo (ver getStaticPaths en blog/[area]/[...slug].astro)
+ * y la miga de pan, la insignia y el índice de área salen del campo. Si no
+ * coinciden, el artículo queda publicado en una dirección que su propio
+ * índice de área no lista — o peor, bajo un área que no existe, con la ficha
+ * viva y el índice de arriba en 404.
+ *
+ * `verificarAreaDeEntrada()` en contenido.ts es quien lo hace fallar; esto
+ * es solo la parte que se puede probar sin `astro:content`.
+ */
+export function areaDelSlug(id: string): string {
+	return slugDe(id).split("/")[0] ?? "";
+}
+
+/**
+ * Nombre de view transition de la foto de un anuncio.
+ *
+ * Es la CUARTA cadena de nombres del sitio (las otras tres están en AGENTS.md)
+ * y, como las demás, no se cruza con ninguna: lleva la sección adelante porque
+ * una propiedad y un vehículo pueden compartir correlativo, y en la home se
+ * muestran las dos listas en la misma página. Un nombre repetido no degrada la
+ * transición: la anula entera.
+ *
+ * El id se limpia porque el nombre es un `<custom-ident>` — nada de barras,
+ * puntos ni espacios.
+ */
+export function transicionFoto(seccion: "propiedad" | "vehiculo", id: string): string {
+	return `foto-${seccion}-${id.replace(/[^a-zA-Z0-9]+/g, "-")}`;
+}
+
 /** Date in Salvadoran format: "12 de marzo de 2025". */
 export function formatearFecha(fecha: Date, locale: Locale = DEFAULT_LOCALE): string {
 	return new Intl.DateTimeFormat(locale === "es" ? "es-SV" : "en-US", {

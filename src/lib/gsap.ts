@@ -9,6 +9,13 @@ import { POLITICA_MOVIMIENTO } from "./motion";
  *
  * Easing curves mirror the CSS custom properties in src/styles/global.css
  * so GSAP motion feels like the same system as the CSS transitions.
+ *
+ * PLUGINS ARE LOADED ONE AT A TIME, on purpose. There used to be a single
+ * `cargarGsap()` that pulled gsap + Flip + ScrollTrigger + CustomEase
+ * together, so a listing page — which only ever uses Flip — downloaded
+ * ScrollTrigger too: 17 KB gzipped of a plugin nothing on that page calls.
+ * The core (gsap + CustomEase) is shared; each plugin has its own entry point
+ * and its own cached promise.
  */
 
 /** Mirror of --duracion-rapida (120ms). */
@@ -17,7 +24,7 @@ export const DURACION_RAPIDA = 0.12;
 export const DURACION_NORMAL = 0.22;
 /** Mirror of --duracion-lenta (380ms). */
 export const DURACION_LENTA = 0.38;
-/** Slower entrance for GSAP-driven hero sequences. */
+/** Mirror of --duracion-entrada (850ms): slower entrances, hero and steps. */
 export const DURACION_ENTRADA = 0.85;
 /** Scroll-triggered reveals: slower than click feedback so it feels intentional. */
 export const DURACION_SCROLL = 0.65;
@@ -29,44 +36,89 @@ export function prefiereMovimientoReducido(): boolean {
 	return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-export type GsapModulo = {
-	gsap: typeof import("gsap").gsap;
-	Flip: typeof import("gsap/Flip").Flip;
+export type GsapNucleo = { gsap: typeof import("gsap").gsap };
+export type ModuloFlip = GsapNucleo & { Flip: typeof import("gsap/Flip").Flip };
+export type ModuloScrollTrigger = GsapNucleo & {
 	ScrollTrigger: typeof import("gsap/ScrollTrigger").ScrollTrigger;
 };
 
-let cache: Promise<GsapModulo | null> | null = null;
+/** Every entry point bails out the same way: no browser, or no motion wanted. */
+function noCorresponde(): boolean {
+	return typeof window === "undefined" || prefiereMovimientoReducido();
+}
+
+let nucleo: Promise<GsapNucleo> | null = null;
 
 /**
- * Loads GSAP and the plugins this site uses. Safe to call from any island:
- * on the server it returns null immediately, and on the client it caches the
- * first load so multiple islands share one instance.
+ * gsap core + CustomEase, with the site's two curves registered.
+ *
+ * CustomEase always comes along (3.3 KB gzipped): "salida" and "suave" ARE
+ * the design tokens from global.css, and a tween that doesn't use them is
+ * moving by a rule nothing else on the site follows.
  */
-export function cargarGsap(): Promise<GsapModulo | null> {
-	if (prefiereMovimientoReducido()) return Promise.resolve(null);
-	if (typeof window === "undefined") return Promise.resolve(null);
-	if (cache) return cache;
+export function cargarGsap(): Promise<GsapNucleo | null> {
+	if (noCorresponde()) return Promise.resolve(null);
+	if (nucleo) return nucleo;
 
-	cache = (async () => {
-		const [{ gsap }, { Flip }, { ScrollTrigger }, { CustomEase }] =
-			await Promise.all([
-				import("gsap"),
-				import("gsap/Flip"),
-				import("gsap/ScrollTrigger"),
-				import("gsap/CustomEase"),
-			]);
+	nucleo = (async () => {
+		const [{ gsap }, { CustomEase }] = await Promise.all([
+			import("gsap"),
+			import("gsap/CustomEase"),
+		]);
 
-		gsap.registerPlugin(Flip, ScrollTrigger, CustomEase);
+		gsap.registerPlugin(CustomEase);
 		CustomEase.create("salida", "0.16, 1, 0.3, 1");
 		CustomEase.create("suave", "0.4, 0, 0.2, 1");
 
-		return { gsap, Flip, ScrollTrigger };
+		return { gsap };
 	})();
 
-	return cache;
+	return nucleo;
 }
 
-type FlipPlugin = NonNullable<GsapModulo["Flip"]>;
+let conFlip: Promise<ModuloFlip> | null = null;
+
+/** Core + Flip. For layout changes: the filtered listing grid. */
+export function cargarFlip(): Promise<ModuloFlip | null> {
+	if (noCorresponde()) return Promise.resolve(null);
+	if (conFlip) return conFlip;
+
+	conFlip = (async () => {
+		const [base, { Flip }] = await Promise.all([
+			cargarGsap() as Promise<GsapNucleo>,
+			import("gsap/Flip"),
+		]);
+		base.gsap.registerPlugin(Flip);
+		return { ...base, Flip };
+	})();
+
+	return conFlip;
+}
+
+let conScrollTrigger: Promise<ModuloScrollTrigger> | null = null;
+
+/**
+ * Core + ScrollTrigger. ONE caller: the scroll-reveal fallback in
+ * src/lib/revelar.ts, for browsers without `animation-timeline: view()`.
+ * In Chrome, Edge and Safari this never downloads.
+ */
+export function cargarScrollTrigger(): Promise<ModuloScrollTrigger | null> {
+	if (noCorresponde()) return Promise.resolve(null);
+	if (conScrollTrigger) return conScrollTrigger;
+
+	conScrollTrigger = (async () => {
+		const [base, { ScrollTrigger }] = await Promise.all([
+			cargarGsap() as Promise<GsapNucleo>,
+			import("gsap/ScrollTrigger"),
+		]);
+		base.gsap.registerPlugin(ScrollTrigger);
+		return { ...base, ScrollTrigger };
+	})();
+
+	return conScrollTrigger;
+}
+
+type FlipPlugin = ModuloFlip["Flip"];
 
 /**
  * Records a Flip state for a set of elements, skipping the snapshot when

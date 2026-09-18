@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getPropiedades } from "@/lib/anuncios";
 import { ubicacionTexto } from "@/lib/geo/el-salvador";
-import { formatearPrecio } from "@/lib/formato";
+import { formatearPrecio, transicionFoto } from "@/lib/formato";
 import { esquemaMigas, migasDe } from "@/lib/seo";
 import { whatsappUrl } from "@/lib/sitio";
 
@@ -153,6 +153,7 @@ const esquemaAnuncio = {
 							ratio="3 / 2"
 							loading="eager"
 							fetchpriority="high"
+							transicion={transicionFoto("propiedad", propiedad.id)}
 							class="zoom-foto"
 						/>
 					</figure>

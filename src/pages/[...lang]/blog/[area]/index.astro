@@ -55,10 +55,27 @@ const coleccion = {
 };
 ---
 
+{
+	/*
+	  Un índice de área SIN artículos no se indexa.
+
+	  Las siete áreas generan su página exista o no un artículo adentro, así
+	  que hoy —con las siete entradas migradas todavía en borrador— hay ocho
+	  direcciones en el sitemap que dicen "Aún no hay publicaciones". Eso es
+	  contenido delgado, y ocho de ellos sobre un sitio de veinte páginas es
+	  la proporción que hace que Google desconfíe del resto.
+
+	  La página sigue existiendo y sigue enlazada desde /blog: es un destino
+	  válido para quien navega. Lo que no hace es pedir que la indexen. En
+	  cuanto Lisbeth publique el primer artículo del área, el noindex se cae
+	  solo.
+	*/
+}
 <BaseLayout
 	locale={locale}
 	titulo={t("blog.enArea", { area: copy.titulo })}
 	descripcion={copy.seoDescripcion}
+	noindex={entradas.length === 0}
 	esquemas={[coleccion, esquemaMigas(migas, site)]}
 >
 	<section class="contenedor py-16 lg:py-20">

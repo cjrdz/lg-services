@@ -83,6 +83,27 @@
 	--duracion-rapida: 120ms; /* response to a click: feels instant */
 	--duracion-normal: 220ms; /* appear, expand */
 	--duracion-lenta: 380ms; /* transition between pages */
+	/*
+	  The one long step, for the first thing a person sees: the hero arriving
+	  on load. It was 0.85s/0.9s written as literals down in the hero rules —
+	  the only motion value on the site that lived outside this block, which is
+	  how a scale stops being a scale. src/lib/gsap.ts mirrors it as
+	  DURACION_ENTRADA.
+	*/
+	--duracion-entrada: 850ms;
+
+	/*
+	  El cambio de tema. Es el único movimiento del sitio que CRUZA la pantalla
+	  entera: el círculo que se abre desde el botón tiene que llegar a la
+	  esquina más lejana, y eso en un monitor ancho son más de mil pixeles.
+
+	  Estaba en --duracion-lenta (380ms), que es la duración del fundido ENTRE
+	  PÁGINAS — un fundido no recorre distancia, solo cambia de opacidad, así
+	  que 380ms le alcanzan de sobra. Aplicados a un barrido daban un destello:
+	  el ojo registraba que algo pasó, pero no alcanzaba a ver qué. La
+	  distancia pide tiempo.
+	*/
+	--duracion-tema: 700ms;
 
 	/* Exits fast, settles smooth: reads as brisk without feeling abrupt. */
 	--curva-salida: cubic-bezier(0.16, 1, 0.3, 1);
@@ -467,8 +488,8 @@
 		opacity: 1;
 		translate: 0 0;
 		transition:
-			opacity 0.85s var(--curva-salida),
-			translate 0.85s var(--curva-salida);
+			opacity var(--duracion-entrada) var(--curva-salida),
+			translate var(--duracion-entrada) var(--curva-salida);
 	}
 
 	@starting-style {
@@ -496,8 +517,8 @@
 		opacity: 1;
 		scale: 1;
 		transition:
-			opacity 0.9s var(--curva-salida),
-			scale 0.9s var(--curva-salida);
+			opacity var(--duracion-entrada) var(--curva-salida),
+			scale var(--duracion-entrada) var(--curva-salida);
 		transition-delay: 90ms;
 	}
 
@@ -641,6 +662,155 @@
 			to {
 				opacity: 1;
 				transform: translateY(0);
+			}
+		}
+	}
+
+	/*
+	  Los pasos del proceso: una secuencia, no una grilla.
+
+	  El resto del sitio revela hacia arriba con `.revelar-grupo`, y para una
+	  grilla de tarjetas —bloques independientes que aparecen— está bien. Esto
+	  es otra cosa: 01, después 02, después 03. El movimiento horizontal es el
+	  que dice "esto avanza" en lugar de "esto aparece", y por eso estos pasos
+	  tienen su propia animación en vez de reusar la de todos.
+
+	  Entran desde la DERECHA porque es el lado por el que se sigue leyendo, y
+	  porque la lista vive en la columna derecha de la banda: el movimiento sale
+	  del borde hacia el centro y no contra él.
+
+	  LA CLAVE ESTÁ EN QUÉ SE MUEVE Y QUÉ NO. La opacidad va en el `<li>` y el
+	  desplazamiento va en sus hijos, y están separados a propósito: el `<li>`
+	  es el que lleva la regla de arriba (`border-t`), y en la primera versión
+	  —con todo el `<li>` deslizándose— la regla viajaba con él, así que durante
+	  la entrada la línea quedaba corta por la izquierda, con un hueco de 30 px
+	  contra el borde de la columna. Se veía como una fila mal alineada, no como
+	  una fila llegando.
+
+	  Ahora la retícula se queda quieta y aparece en su lugar; lo que entra
+	  desde la derecha es el contenido. La estructura —las tres reglas, los tres
+	  renglones— se establece primero y los pasos llegan a ocuparla, que además
+	  es exactamente lo que dice el texto de al lado: tres pasos, sin sorpresas.
+
+	  Misma máquina que `.revelar`: `animation-timeline: view()`, cero JS, en el
+	  compositor.
+
+	  El escalonamiento NO está escrito en ningún lado, y eso es a propósito:
+	  cada `<li>` tiene su propia línea de tiempo `view()`, que depende de dónde
+	  está en la página, así que 02 entra después de 01 porque está más abajo y
+	  ya. Es también lo que hace que esto funcione con los pasos que sean —tres,
+	  cinco, los que Lisbeth agregue en /keystatic— sin tocar una línea de acá.
+
+	  EL RANGO ES `cover`, NO `entry`, Y ESA ES LA DIFERENCIA ENTRE VERLO Y NO
+	  VERLO. La fase `entry` dura lo que MIDE EL ELEMENTO: va de "el borde de
+	  arriba toca el borde de abajo de la pantalla" a "el borde de abajo ya
+	  pasó". Un paso mide unos 110 px de alto, así que `entry 5%` → `entry 55%`
+	  le daba a la animación 55 px de scroll para empezar y terminar: en un
+	  gesto normal de rueda o de dedo eso se salta entero y los pasos ya estaban
+	  puestos cuando aparecían.
+
+	  `cover` mide toda la travesía: desde que el elemento toca la pantalla
+	  hasta que sale por arriba, o sea el alto del elemento MÁS el de la
+	  ventana. En una pantalla de 800 px son ~935, así que el mismo 30 % de
+	  recorrido pasa de 55 px a ~280. La animación es idéntica; lo que cambia es
+	  cuánto scroll ocupa.
+
+	  Y TERMINA EN 30 %, NO MÁS TARDE, por una razón geométrica: al 30 % de
+	  `cover` el borde de arriba del paso queda más o menos al 65 % de la altura
+	  de la ventana, y esa proporción casi no se mueve aunque la ventana cambie
+	  de alto (el paso mide poco al lado de la pantalla). O sea: el paso termina
+	  de aparecer justo cuando entra en la zona donde uno lo está leyendo.
+
+	  Antes el rango llegaba al 54 % y el resultado era el defecto que se veía en
+	  cualquier pantalla alta: el último paso todavía a media opacidad cuando ya
+	  estaba entero a la vista y perfectamente legible. Estirar el rango para que
+	  la animación se note y estirarlo hasta que termine tarde son dos cosas
+	  distintas, y esta es la línea entre ellas.
+	*/
+	.proceso-lista {
+		/*
+		  `clip`, no `hidden`: el contenido entra desde translateX(2rem) —medio
+		  centímetro— y hasta que ese tramo termina, el borde derecho del texto
+		  vive fuera de la columna que le toca. Sin este corte, ese medio
+		  centímetro empujaba el ancho de TODA la página: a 320px de pantalla el
+		  body medía 16px de más y aparecía una barra de scroll horizontal en el
+		  sitio entero, no solo en esta sección — encontrado barriendo once
+		  páginas en diez anchos con Playwright, no a simple vista.
+
+		  Va acá y no en cada `.proceso-paso` porque cubre las dos rutas a la
+		  vez: la animación CSS (`--paso-retraso` ya no existe, pero el
+		  desplazamiento sigue viniendo de la derecha) y el respaldo de GSAP en
+		  `src/lib/revelar.ts`, que anima el mismo `translateX` en Firefox. Por
+		  eso la regla vive FUERA del `@supports` de abajo.
+
+		  `clip` y no `hidden`: `hidden` crea un contenedor de scroll propio (y
+		  con eso un nuevo "scrolling box" que algunos lectores de pantalla
+		  anuncian); `clip` solo recorta el pintado, sin ese efecto secundario.
+		  Incluso más nuevo que `animation-timeline: view()` — que ya es el piso
+		  de compatibilidad de esta sección — así que no resta nada.
+		*/
+		overflow-x: clip;
+	}
+
+	@supports (animation-timeline: view()) {
+		.proceso-paso {
+			animation: proceso-paso-entra linear both;
+			animation-timeline: view();
+			animation-range: cover 0% cover 30%;
+		}
+
+		.proceso-cuerpo {
+			animation: proceso-cuerpo-entra linear both;
+			animation-timeline: view();
+			animation-range: cover 0% cover 30%;
+		}
+
+		/*
+		  El ordinal llega un poco después que su texto y desde menos distancia.
+
+		  Es el único detalle del bloque que no es un simple deslizamiento, y es
+		  el que le da relieve a la fila: si el 01 y su título entran pegados y a
+		  la misma velocidad, los tres pasos se mueven como una tabla.
+		*/
+		.proceso-ordinal {
+			animation: proceso-ordinal-entra linear both;
+			animation-timeline: view();
+			animation-range: cover 4% cover 34%;
+		}
+
+		/*
+		  Ninguna de las tres anima las dos cosas: el `<li>` solo la opacidad,
+		  los hijos solo la posición. Si ambos animaran opacidad se multiplicaría
+		  una por otra y la entrada se vería más oscura y más tarde de lo escrito.
+
+		  `transform`, NO `translate`: es la misma razón que en `.revelar` —
+		  `translate` es de `.elevable` para su elevación, y una animación con
+		  `fill: both` le gana a una declaración normal.
+		*/
+		@keyframes proceso-paso-entra {
+			from {
+				opacity: 0;
+			}
+			to {
+				opacity: 1;
+			}
+		}
+
+		@keyframes proceso-cuerpo-entra {
+			from {
+				transform: translateX(2rem);
+			}
+			to {
+				transform: translateX(0);
+			}
+		}
+
+		@keyframes proceso-ordinal-entra {
+			from {
+				transform: translateX(0.85rem);
+			}
+			to {
+				transform: translateX(0);
 			}
 		}
 	}
@@ -802,6 +972,137 @@
 	}
 
 	/*
+	  Menú de teléfono.
+
+	  Misma mecánica que el acordeón de las FAQ y el panel de filtros: una
+	  fila de grilla de 0fr a 1fr anima la altura sin que nadie mida el
+	  contenido en JavaScript.
+
+	  Por defecto ABIERTO, y lo cierra `.js`. No es un detalle: debajo de `lg`
+	  la navegación de escritorio está oculta, así que sin JavaScript un panel
+	  cerrado dejaría el sitio sin menú. Como `.js` se pone antes del primer
+	  paint, nadie llega a ver el panel abierto.
+
+	  `visibility` y no solo altura: una fila de 0fr con `overflow: hidden`
+	  esconde los enlaces a la vista pero los deja enfocables con el tabulador,
+	  y se tabula dentro de un menú cerrado. El retraso invertido en la
+	  transición es lo que deja que el panel termine de plegarse ANTES de
+	  desaparecer, en vez de cortar a la mitad.
+	*/
+	.menu-movil {
+		display: grid;
+		grid-template-rows: 1fr;
+	}
+
+	.menu-movil > * {
+		overflow: hidden;
+	}
+
+	.js .menu-movil {
+		grid-template-rows: 0fr;
+		visibility: hidden;
+		transition:
+			grid-template-rows var(--duracion-normal) var(--curva-salida),
+			visibility 0s linear var(--duracion-normal);
+	}
+
+	.js .menu-movil[data-abierto="true"] {
+		grid-template-rows: 1fr;
+		visibility: visible;
+		transition:
+			grid-template-rows var(--duracion-normal) var(--curva-salida),
+			visibility 0s linear 0s;
+	}
+
+	.menu-fondo {
+		opacity: 0;
+		visibility: hidden;
+		transition:
+			opacity var(--duracion-rapida) var(--curva-suave),
+			visibility 0s linear var(--duracion-rapida);
+	}
+
+	.menu-fondo[data-abierto="true"] {
+		opacity: 1;
+		visibility: visible;
+		transition:
+			opacity var(--duracion-rapida) var(--curva-suave),
+			visibility 0s linear 0s;
+	}
+
+	/* Cruce menú↔cerrar, igual que el del tema: dos SVG del build, sin JS. */
+	.menu-icono {
+		position: absolute;
+		opacity: 0;
+		rotate: -90deg;
+		scale: 0.6;
+		transition:
+			opacity var(--duracion-normal) var(--curva-suave),
+			rotate var(--duracion-normal) var(--curva-suave),
+			scale var(--duracion-normal) var(--curva-suave);
+	}
+
+	.menu-icono-abrir,
+	[aria-expanded="true"] .menu-icono-cerrar {
+		opacity: 1;
+		rotate: 0deg;
+		scale: 1;
+	}
+
+	[aria-expanded="true"] .menu-icono-abrir {
+		opacity: 0;
+		rotate: 90deg;
+		scale: 0.6;
+	}
+
+	/*
+	  Cambio de tema: el sol y la luna se cruzan en su lugar.
+
+	  Esto reemplaza una isla de Svelte con `morphicons` que vivía en la
+	  cabecera y por lo tanto se cargaba en TODAS las páginas — el runtime de
+	  Svelte más el motor de morph de íconos, para dibujar dos formas que ya
+	  se conocen en el build. Acá son dos SVG en línea y un cruce en CSS.
+
+	  El estado no lo escribe nadie en JavaScript: lo dice `.dark` en <html>,
+	  que ya está puesto antes del primer paint. Así el botón se dibuja
+	  correcto sin hidratar nada y sin el sol→luna visible que hacía la isla
+	  en cada carga.
+
+	  `rotate` y `scale` como propiedades sueltas, no dentro de un `transform`:
+	  así el cruce no le pisa nada a `.elevable` ni a `.zoom-foto`, que es la
+	  misma razón por la que el revelado usa `transform` y no `translate`.
+	*/
+	/*
+	  El ícono va en --duracion-lenta y el barrido en --duracion-tema, y la
+	  diferencia es a propósito: el botón contesta el clic enseguida y la
+	  página llega después. Igualarlos dejaba el sol y la luna girando en cámara
+	  lenta, como si el botón se hubiera trabado.
+	*/
+	.tema-icono {
+		position: absolute;
+		opacity: 0;
+		rotate: -90deg;
+		scale: 0.6;
+		transition:
+			opacity var(--duracion-lenta) var(--curva-suave),
+			rotate var(--duracion-lenta) var(--curva-suave),
+			scale var(--duracion-lenta) var(--curva-suave);
+	}
+
+	.tema-icono-sol,
+	.dark .tema-icono-luna {
+		opacity: 1;
+		rotate: 0deg;
+		scale: 1;
+	}
+
+	.dark .tema-icono-sol {
+		opacity: 0;
+		rotate: 90deg;
+		scale: 0.6;
+	}
+
+	/*
 	  FAQ accordion. Grid-template-rows animates from 0fr to 1fr, giving a
 	  smooth height transition without measuring the content in JS.
 	  Default is open so no-JS users can read the answers; JS collapses it.
@@ -891,6 +1192,43 @@
 	mix-blend-mode: normal !important;
 }
 
+/*
+  Cambio de TEMA, no de página.
+
+  public/scripts/theme-init.js pone `data-vt="tema"` en <html> antes de
+  llamar a startViewTransition(), y anima un `clip-path` circular sobre
+  `::view-transition-new(root)` que se abre desde el botón. Lo que hace falta
+  acá son las dos condiciones para que ese círculo se vea:
+
+  1. Ni el viejo ni el nuevo se desvanecen. El fundido de página y el círculo
+     a la vez dan un cruce turbio en el que no se lee ninguno de los dos; acá
+     el estado viejo se queda quieto abajo y el nuevo se revela encima.
+
+  2. Nada más en la página puede tener `view-transition-name`. Un nombre saca
+     al elemento del snapshot de la raíz y le da su propia capa — y el círculo
+     solo recorta la raíz. La cabecera, el pie o la foto de un anuncio se
+     quedarían flotando con el tema anterior mientras el resto cambia. El
+     `!important` es porque varios de esos nombres vienen en un atributo
+     `style` en línea (ver src/lib/transicion-foto.ts) y nada sin `!important`
+     le gana a eso.
+
+  Al ser una transición dentro de la misma página, apagarlos no cuesta nada:
+  no hay navegación de la cual animar.
+*/
+:root[data-vt="tema"]::view-transition-old(root) {
+	animation: none;
+	z-index: 0;
+}
+
+:root[data-vt="tema"]::view-transition-new(root) {
+	animation: none;
+	z-index: 1;
+}
+
+:root[data-vt="tema"] *:not(:root) {
+	view-transition-name: none !important;
+}
+
 @keyframes salir {
 	to {
 		opacity: 0;
@@ -953,7 +1291,18 @@
 		transform: none !important;
 	}
 
-	:root[data-motion="sistema"] .js .acordeon-contenido {
+	/* Misma regla para los pasos del proceso, y por el mismo motivo: sin
+	   `animation: none` se quedarían transparentes, porque una animación de
+	   scroll no la toca el `animation-duration: 0.01ms` de arriba. */
+	:root[data-motion="sistema"] .proceso-paso,
+	:root[data-motion="sistema"] .proceso-cuerpo,
+	:root[data-motion="sistema"] .proceso-ordinal {
+		animation: none !important;
+		opacity: 1 !important;
+		transform: none !important;
+	}
+
+	:root[data-motion="sistema"].js .acordeon-contenido {
 		grid-template-rows: 1fr !important;
 		transition: none !important;
 	}
@@ -963,6 +1312,14 @@
 	  What goes away is the animation between the two states.
 	*/
 	:root[data-motion="sistema"] .panel-plegable {
+		transition: none !important;
+	}
+
+	/* Como el panel de filtros: es un control, tiene que seguir abriendo.
+	   Lo que desaparece es la animación entre los dos estados. */
+	:root[data-motion="sistema"].js .menu-movil,
+	:root[data-motion="sistema"] .menu-fondo,
+	:root[data-motion="sistema"] .menu-icono {
 		transition: none !important;
 	}
 

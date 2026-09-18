@@ -68,6 +68,25 @@ export default defineConfig({
 	trailingSlash: "ignore",
 	devToolbar: { enabled: false },
 
+	/*
+	  Prefetch.
+
+	  <ClientRouter /> ya lo enciende solo, pero con la estrategia "hover": la
+	  página se empieza a bajar cuando el puntero se posa en el enlace. En un
+	  teléfono, que es de donde llega la mayor parte del tráfico de este sitio,
+	  no hay hover — así que ahí no adelantaba nada.
+
+	  Declararlo acá deja las dos cosas explícitas y permite subir a "viewport"
+	  donde vale la pena, enlace por enlace, con data-astro-prefetch: los cinco
+	  del menú (ver Navbar.astro), que son las páginas a las que de verdad va
+	  la gente. "viewport" para TODO sería lo contrario de una mejora: un
+	  listado con cien anuncios pediría cien páginas que nadie abrió.
+	*/
+	prefetch: {
+		prefetchAll: true,
+		defaultStrategy: "hover",
+	},
+
 	// Astro sessions aren't used (Keystatic manages its own cookies), so this
 	// avoids the adapter requiring a "SESSION" KV binding on deploy.
 	session: false,
@@ -132,6 +151,20 @@ export default defineConfig({
 		// panel runs in production too.
 		keystatic(),
 		sitemap({
+			/*
+			  /contacto/ NO se genera estático (prerender = false: sin
+			  JavaScript el endpoint responde 303 y vuelve con ?envio=ok, y una
+			  página estática no puede leer eso en el servidor). El sitemap se
+			  arma con lo que quedó en disco, así que la página de contacto de
+			  una abogada —de las dos o tres direcciones que más importan en un
+			  negocio local— no aparecía en el sitemap. Va a mano.
+
+			  Se listan todos los idiomas porque el sitemap no puede deducir las
+			  alternativas de una URL que él no generó.
+			*/
+			customPages: LOCALES.map((l) =>
+				l === DEFAULT_LOCALE ? `${SITE}/contacto/` : `${SITE}/${l}/contacto/`,
+			),
 			i18n: {
 				defaultLocale: DEFAULT_LOCALE,
 				locales: Object.fromEntries(LOCALES.map((l) => [l, l])),
@@ -159,6 +192,44 @@ export default defineConfig({
 
 	vite: {
 		plugins: [tailwindcss(), noCachearEnDev()],
+
+		/*
+		  Dependencias del CLIENTE que hay que pre-empaquetar al arrancar.
+
+		  Todas estas llegan por un import DINÁMICO: GSAP se carga dentro de
+		  `onMount` (src/lib/gsap.ts) y los componentes de las islas se piden
+		  cuando la isla hidrata, no cuando carga la página. Vite no las ve al
+		  arrancar, así que las descubría a mitad de sesión — y descubrir una
+		  dependencia nueva significa RE-OPTIMIZAR, o sea un hash `?v=` nuevo
+		  para todo el lote. La página que ya estaba abierta seguía pidiendo el
+		  hash viejo, que ya no existe:
+
+		      GET /node_modules/.vite/deps/gsap.js?v=6bbc6f6f
+		      net::ERR_ABORTED 504 (Outdated Optimize Dep)
+
+		  Reproducido: `bun run smoke` fallaba en /propiedades/ y /vehiculos/
+		  con 504 en gsap y gsap_CustomEase — las dos páginas con el filtro, que
+		  es lo único que carga GSAP. Declaradas acá, el optimizador corre UNA
+		  vez al arrancar y el hash no se mueve en toda la sesión.
+
+		  Es primo del bug de caché caliente documentado en AGENTS.md, pero NO
+		  el mismo: aquel era el navegador guardándose un módulo viejo, este es
+		  el servidor cambiando los hashes por abajo. Solo afecta a desarrollo;
+		  en el build no hay optimizador de dependencias.
+		*/
+		optimizeDeps: {
+			include: [
+				"gsap",
+				"gsap/Flip",
+				"gsap/ScrollTrigger",
+				"gsap/CustomEase",
+				"svelte",
+				"svelte/internal/client",
+				"morphicons/svelte",
+				"lucide",
+			],
+		},
+
 		ssr: {
 			/*
 			  Keystatic's API handler depends on `cookie`, pure CommonJS

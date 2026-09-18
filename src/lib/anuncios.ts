@@ -2,6 +2,7 @@ import { getCollection, type CollectionEntry } from "astro:content";
 import { DEFAULT_LOCALE, type Locale } from "@/i18n/config";
 import { etiqueta } from "@/i18n/enums";
 import { departamentoNombre, distritoNombre } from "./geo/el-salvador";
+import { transicionFoto } from "./formato";
 import type { TarjetaAnuncio } from "./anuncios-tipos";
 
 // Re-exported so pages import everything from one place.
@@ -61,6 +62,7 @@ export function propiedadATarjeta(
 		slug: p.id,
 		ref: d.referencia,
 		href: `${base}${p.id}/`,
+		transicion: transicionFoto("propiedad", p.id),
 		titulo: d.titulo,
 		subtitulo: `${dis}, ${dep}`,
 		foto: portada?.ruta ?? "",
@@ -140,6 +142,7 @@ export function vehiculoATarjeta(
 		slug: v.id,
 		ref: d.referencia,
 		href: `${base}${v.id}/`,
+		transicion: transicionFoto("vehiculo", v.id),
 		titulo: d.titulo,
 		// The spec sheet plays the role of "location" here — it's what identifies a vehicle.
 		subtitulo: `${d.marca} ${d.modelo} · ${d.anio} · ${etiqueta("categoriaVehiculo", d.categoria, locale)}`,

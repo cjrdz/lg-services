@@ -36,38 +36,59 @@ const t = useTranslations(locale);
 					)}
 				</div>
 
-			{/*
-			  One step at a time, not one block: the list IS a sequence, so each
-			  <li> reveals on its own view() timeline. The inline offsets (0/20/40%)
-			  make 02 follow 01 and 03 follow 02 with a noticeable gap; the
-			  default grid offsets (0/6/12%) were too tight for a vertical list
-			  and made the three steps read as one block. Zero JS — reduced
-			  motion still shows everything at once.
+				{/*
+			  Los pasos entran DE COSTADO, no desde abajo, y por eso no usan
+			  `.revelar-grupo` como el resto del sitio.
+
+			  La diferencia no es decorativa. Todo lo demás en la página es una
+			  grilla de tarjetas: bloques independientes que aparecen, y para eso
+			  subir desde abajo está bien. Esto es una SECUENCIA — 01, después 02,
+			  después 03 — y el movimiento horizontal es el que dice "esto avanza"
+			  en vez de "esto aparece". Cada paso llega desde la derecha, que es
+			  el lado por el que se sigue leyendo.
+
+			  NO hay un desfase escrito por paso, y eso es deliberado. Cada `<li>`
+			  tiene su propia línea de tiempo `view()`, que depende de DÓNDE ESTÁ
+			  en la página, así que el escalonamiento ya viene puesto: 02 está un
+			  paso más abajo que 01 y por eso entra después. Un desfase a mano
+			  encima de eso llegaba tarde —el último paso seguía a media opacidad
+			  cuando ya se podía leer entero— y además estaba capado al tercero
+			  (`i === 1 ? ... : ...`), así que con cinco pasos el tercero, el
+			  cuarto y el quinto habrían entrado todos juntos.
+
+			  Sin él, esto funciona con los pasos que sean: agregá un cuarto en
+			  /keystatic y entra en su turno, sin tocar una línea de CSS.
+
+			  Lo que se mueve es el CONTENIDO, no la fila: el `<li>` lleva la regla
+			  de arriba y se queda quieto (solo aparece), mientras el cuerpo y el
+			  ordinal entran desde la derecha. Con todo el `<li>` deslizándose, la
+			  regla viajaba con él y quedaba corta por la izquierda durante la
+			  entrada — una fila mal alineada en vez de una fila llegando.
+
+			  El ordinal va un pelo atrás del cuerpo y desde menos distancia (ver
+			  `.proceso-ordinal` en global.css): ese desfase es lo que le da
+			  relieve a la fila en vez de que se mueva todo como una tabla.
+
+			  Cero JS donde el navegador tiene `animation-timeline: view()`; en
+			  Firefox lo cubre src/lib/revelar.ts con el GSAP que ya carga ahí.
 			*/}
-			<ol class="revelar-grupo">
-				{pasos.map((paso, i) => {
-					// Stronger per-step offsets so the sequence actually reads:
-					// 01 enters first, 02 a noticeable distance later, 03 last.
-					// The default grid offsets (0/6/12%) made the three steps
-					// look like one block on a vertical list.
-					const retraso = i === 0 ? "0%" : i === 1 ? "20%" : "40%";
-					return (
-						<li
-							class="border-banda-linea grid grid-cols-[2.6rem_minmax(0,1fr)] gap-5 border-t py-6 last:border-b"
-							style={`--revelar-retraso: ${retraso}`}
-						>
-							<span
-								aria-hidden="true"
-								class="text-accent font-serif text-xl tabular-nums"
-							>
-								{String(i + 1).padStart(2, "0")}
-							</span>
-							<div class="min-w-0">
-								<h3 class="text-banda-titulo text-lg font-semibold">{paso.titulo}</h3>
-								<p class="mt-1.5 leading-relaxed">{paso.descripcion}</p>
-							</div>
-						</li>
-					)})}
+				<ol class="proceso-lista">
+					{pasos.map((paso, i) => {
+						return (
+							<li class="border-banda-linea proceso-paso grid grid-cols-[2.6rem_minmax(0,1fr)] gap-5 border-t py-6 last:border-b">
+								<span
+									aria-hidden="true"
+									class="text-accent proceso-ordinal font-serif text-xl tabular-nums"
+								>
+									{String(i + 1).padStart(2, "0")}
+								</span>
+								<div class="proceso-cuerpo min-w-0">
+									<h3 class="text-banda-titulo text-lg font-semibold">{paso.titulo}</h3>
+									<p class="mt-1.5 leading-relaxed">{paso.descripcion}</p>
+								</div>
+							</li>
+						);
+					})}
 				</ol>
 			</div>
 		</section>

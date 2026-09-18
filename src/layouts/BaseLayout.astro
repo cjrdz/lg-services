@@ -137,6 +137,25 @@ const esquemasValidos = esquemas.filter(
 		<script is:inline src="/scripts/theme-init.js"></script>
 
 		{
+			/*
+		  Scroll reveals for browsers WITHOUT `animation-timeline: view()` —
+		  which today means Firefox. The module checks for the feature first
+		  and returns, so Chrome, Edge and Safari never download GSAP; there,
+		  the CSS in global.css is still the only thing running. See
+		  src/lib/revelar.ts.
+		*/
+		}
+		<script>
+			import { activarRevelarFallback } from "@/lib/revelar";
+			import { activarMorphDeFotos } from "@/lib/transicion-foto";
+			import { activarMenuMovil } from "@/lib/menu-movil";
+
+			activarRevelarFallback();
+			activarMorphDeFotos();
+			activarMenuMovil();
+		</script>
+
+		{
 			esquemasValidos.map((esquema) => (
 				<script type="application/ld+json" set:html={JSON.stringify(esquema)} />
 			))

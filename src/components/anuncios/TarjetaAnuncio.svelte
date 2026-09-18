@@ -28,6 +28,11 @@
 	<!--
 		The photo is clipped here rather than on the <img>, so the zoom on hover
 		happens inside a frame that doesn't move.
+
+		`data-foto-transicion` y no `view-transition-name` directo: el nombre lo
+		pone src/lib/transicion-foto.ts sobre UNA sola tarjeta, la que lleva a
+		donde va la navegación. Ponérselo a todas serían tantos snapshots como
+		anuncios cada vez que alguien se va de la página.
 	-->
 	<div class="relative overflow-hidden">
 		{#if r2Url(tarjeta.foto, 480)}
@@ -39,6 +44,7 @@
 				loading="lazy"
 				decoding="async"
 				style="aspect-ratio:4/3"
+				data-foto-transicion={tarjeta.transicion}
 				class="zoom-foto bg-muted w-full object-cover"
 			/>
 		{:else}

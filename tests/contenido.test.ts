@@ -4,9 +4,11 @@ import { describe, expect, it } from "vitest";
 import {
 	formatearFecha,
 	formatearPrecio,
+	areaDelSlug,
 	slugDe,
 	tiempoLectura,
 	transicionEntrada,
+	transicionFoto,
 } from "@/lib/formato";
 import {
 	AREAS,
@@ -56,6 +58,48 @@ describe("transicionEntrada", () => {
 		// elementos con el mismo nombre en una página anulan la transición.
 		expect(transicionEntrada("es/asesoria-academica/tesis")).not.toBe(
 			transicionEntrada("es/asesoria-academica/tutorias"),
+		);
+	});
+});
+
+describe("areaDelSlug", () => {
+	it("saca el área del prefijo de la dirección, sin el idioma", () => {
+		expect(areaDelSlug("es/derecho-laboral/despido-injustificado")).toBe(
+			"derecho-laboral",
+		);
+	});
+
+	it("es lo que se compara contra el campo `area` del panel", () => {
+		// El caso que rompe el sitio: la dirección dice un área y el select
+		// dice otra. La entrada se publica en /blog/derecho-penal/… pero su
+		// índice de área nunca la lista.
+		expect(areaDelSlug("es/derecho-penal/demanda-laboral")).not.toBe("derecho-laboral");
+	});
+
+	it("tolera un id sin área, en vez de reventar", () => {
+		expect(areaDelSlug("es/suelto")).toBe("suelto");
+	});
+});
+
+describe("transicionFoto", () => {
+	it("separa propiedades de vehículos, que comparten correlativo", () => {
+		// En la home se muestran las dos listas en la MISMA página: un nombre
+		// repetido no degrada la transición, la anula entera.
+		expect(transicionFoto("propiedad", "P-0001")).not.toBe(
+			transicionFoto("vehiculo", "P-0001"),
+		);
+	});
+
+	it("produce un <custom-ident> válido", () => {
+		// Nada de barras, puntos ni espacios: no son válidos en un custom-ident.
+		expect(transicionFoto("propiedad", "casa/santa tecla.2")).toMatch(
+			/^[a-zA-Z][a-zA-Z0-9-]*$/,
+		);
+	});
+
+	it("es estable: la tarjeta y la ficha lo calculan por separado", () => {
+		expect(transicionFoto("vehiculo", "V-0001")).toBe(
+			transicionFoto("vehiculo", "V-0001"),
 		);
 	});
 });

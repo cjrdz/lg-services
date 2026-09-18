@@ -22,6 +22,12 @@ export interface TarjetaAnuncio {
 	slug: string;
 	ref: string;
 	href: string;
+	/**
+	 * `view-transition-name` de la foto, compartido con la ficha del anuncio:
+	 * la foto de la tarjeta crece hasta la portada en vez de cortar a negro.
+	 * Lo arma `transicionFoto()` en src/lib/formato.ts.
+	 */
+	transicion: string;
 	titulo: string;
 	subtitulo: string;
 	foto: string;

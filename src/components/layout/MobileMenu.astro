@@ -1,0 +1,90 @@
+---
+import Icon from "@/components/Icon.astro";
+
+/**
+ * Menú de teléfono. CERO JavaScript de framework.
+ *
+ * Era una isla de Svelte y, aunque `client:media` ya evitaba hidratarla en
+ * escritorio, en un teléfono seguía bajando el runtime de Svelte (18.6 KB
+ * gzip) más morphicons (7.8 KB) — y el tráfico de este sitio es sobre todo
+ * de teléfono, así que la mejora estaba cayendo justo del lado equivocado.
+ *
+ * Abrir y cerrar es un atributo y una fila de grilla que va de 0fr a 1fr,
+ * el mismo truco que ya usaban el acordeón de las FAQ y el panel de filtros:
+ * altura animada sin medir nada. El cruce menú↔cerrar son dos SVG resueltos
+ * en el build. Lo único que queda en JavaScript es lo que de verdad lo
+ * necesita — el clic, Escape y el bloqueo del scroll — y son tres listeners
+ * delegados en `document` para toda la vida del documento.
+ *
+ * SIN JavaScript el menú queda ABIERTO, que es la única versión utilizable:
+ * debajo de `lg` la navegación de escritorio está oculta, así que un panel
+ * cerrado y sin botón que funcione deja el sitio sin menú. La clase `.js`
+ * —puesta antes del primer paint por theme-init.js— es la que lo cierra, así
+ * que nadie ve el panel abrirse y cerrarse al cargar.
+ */
+interface Enlace {
+	href: string;
+	label: string;
+	activo: boolean;
+}
+
+interface Props {
+	enlaces: Enlace[];
+	etiquetaAbrir: string;
+	etiquetaCerrar: string;
+}
+
+const { enlaces, etiquetaAbrir, etiquetaCerrar } = Astro.props;
+---
+
+<button
+	type="button"
+	data-menu-boton
+	data-label-abrir={etiquetaAbrir}
+	data-label-cerrar={etiquetaCerrar}
+	aria-label={etiquetaAbrir}
+	aria-expanded="false"
+	aria-controls="menu-movil"
+	class="hover:bg-muted color-animado relative inline-flex size-9 items-center justify-center rounded-lg lg:hidden"
+>
+	<Icon name="lucide:menu" size={22} class="menu-icono menu-icono-abrir" />
+	<Icon name="lucide:x" size={22} class="menu-icono menu-icono-cerrar" />
+</button>
+
+{
+	/*
+	  El fondo NO se esconde con `display`: una clase de @layer components
+	  pierde contra cualquier utilidad de Tailwind en el elemento (la misma
+	  trampa anotada en `.elevable`). Va con opacity + visibility, que además
+	  son lo que hace falta para que se desvanezca.
+	*/
+}
+<div
+	data-menu-fondo
+	class="menu-fondo bg-background/80 fixed inset-0 top-20 z-40 backdrop-blur-sm lg:hidden"
+>
+</div>
+
+<nav
+	id="menu-movil"
+	data-menu-panel
+	class="menu-movil bg-background border-border fixed inset-x-0 top-20 z-40 border-b shadow-lg lg:hidden"
+>
+	<div>
+		<ul class="flex flex-col p-2">
+			{
+				enlaces.map((enlace) => (
+					<li>
+						<a
+							href={enlace.href}
+							aria-current={enlace.activo ? "page" : undefined}
+							class="hover:bg-muted color-animado aria-[current=page]:text-primary block rounded-lg px-4 py-3 text-base font-medium"
+						>
+							{enlace.label}
+						</a>
+					</li>
+				))
+			}
+		</ul>
+	</div>
+</nav>

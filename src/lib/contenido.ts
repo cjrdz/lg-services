@@ -1,11 +1,14 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 import { DEFAULT_LOCALE, type Locale } from "@/i18n/config";
 import type { AreaId } from "./taxonomia";
+import { areaDelSlug } from "./formato";
 
 // Re-exported so pages keep importing everything from one place.
 export {
 	slugDe,
+	areaDelSlug,
 	transicionEntrada,
+	transicionFoto,
 	formatearFecha,
 	tiempoLectura,
 	formatearPrecio,
@@ -49,8 +52,36 @@ export async function getServicioPorArea(
 	);
 }
 
+/**
+ * Rompe el build si la direccion de una entrada no coincide con su area.
+ *
+ * Es la unica validacion del blog que zod NO puede hacer: el `schema` de una
+ * coleccion recibe el frontmatter y nunca el id del archivo, asi que la
+ * comparacion tiene que pasar por aca, donde se leen las entradas.
+ *
+ * Y tiene que existir, porque el panel le pide a Lisbeth la misma cosa dos
+ * veces: escribir "area/nombre-del-articulo" en la direccion Y elegir el area
+ * de una lista. Si no coinciden, el articulo sale publicado en una direccion
+ * que su indice de area no lista. El build es la red de seguridad: falla, y
+ * el despliegue anterior se queda en vivo.
+ *
+ * Mensaje en ASCII a proposito: viaja por una cabecera de error del
+ * prerender de Cloudflare que no acepta acentos y los deja ilegibles.
+ */
+function verificarAreaDeEntrada(id: string, area: string): void {
+	const prefijo = areaDelSlug(id);
+	if (prefijo === area) return;
+
+	throw new Error(
+		`Entrada de blog "${id}": la direccion empieza con "${prefijo}/" pero el ` +
+			`campo "Area de practica" dice "${area}". Tienen que ser el mismo. ` +
+			`En /keystatic, o corregi la direccion web o cambia el area.`,
+	);
+}
+
 export async function getEntradas(locale: Locale = DEFAULT_LOCALE) {
 	const todas = await getCollection("blog", ({ data }) => publicado(data));
+	for (const e of todas) verificarAreaDeEntrada(e.id, e.data.area);
 	return todas
 		.filter((e) => e.data.locale === locale)
 		.sort((a, b) => b.data.publicado.valueOf() - a.data.publicado.valueOf());

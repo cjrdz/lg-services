@@ -12,15 +12,31 @@ export const opcionesAreas = AREA_IDS.map((id) => ({
 }));
 
 /**
- * Subtopics across all areas, deduplicated, for the blog's select.
+ * Subtopics for the blog's select, QUALIFIED BY AREA.
  *
- * Grouped by area in the source, but offered as one flat list in the panel
- * because a blog article picks ONE subtema and the area is validated
- * separately.
+ * They used to be one flat alphabetical list — "Adopción, Contratos,
+ * Divorcio, Impuestos…" — with nothing on screen saying which area each one
+ * belonged to. Lisbeth picks the area in the field right above, and then has
+ * to guess from a list of 32 which ones are hers; picking "Divorcio" for a
+ * tax article was a click away and the build accepted it.
+ *
+ * Keystatic can't filter one select by another's value without turning the
+ * field into a `conditional`, and that changes the SHAPE of what's written to
+ * the file (`{ discriminant, value }`), which would mean migrating every
+ * existing entry. So the options stay flat and the LABEL does the work: the
+ * list is grouped by area, in the same order as the field above, and every
+ * label is prefixed with its area. The stored value is unchanged.
+ *
+ * The real guard is still in src/content.config.ts, which rejects a subtopic
+ * that doesn't belong to the chosen area at build time. This just means she
+ * shouldn't hit it.
  */
 export const opcionesSubtemas = [
 	{ label: "— Ninguno —", value: "" },
-	...[...new Set(AREA_IDS.flatMap((id) => SUBTEMAS[id]))]
-		.sort((a, b) => a.localeCompare(b, "es"))
-		.map((s) => ({ label: s, value: s })),
+	...AREA_IDS.flatMap((id) =>
+		SUBTEMAS[id].map((s) => ({
+			label: `${AREAS[id].i18n.es.titulo} › ${s}`,
+			value: s,
+		})),
+	),
 ];

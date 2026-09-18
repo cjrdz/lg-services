@@ -16,6 +16,8 @@
 		"abrirMenu": "Abrir menú",
 		"cerrarMenu": "Cerrar menú",
 		"cambiarTema": "Cambiar tema",
+		"temaClaro": "Cambiar a tema claro",
+		"temaOscuro": "Cambiar a tema oscuro",
 		"menuPrincipal": "Menú principal",
 		"irAlContenido": "Ir al contenido"
 	},

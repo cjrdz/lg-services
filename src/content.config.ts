@@ -3,7 +3,7 @@ import { glob } from "astro/loaders";
 
 import { DEFAULT_LOCALE, LOCALES } from "./i18n/config";
 import { ids } from "./i18n/enums";
-import { AREA_IDS } from "./lib/taxonomia";
+import { AREA_IDS, SUBTEMAS } from "./lib/taxonomia";
 import { DEPARTAMENTO_IDS, distritoValido } from "./lib/geo/el-salvador";
 import { RE_TALLO } from "./lib/media/keys";
 
@@ -74,22 +74,44 @@ const servicios = defineCollection({
 
 const blog = defineCollection({
 	loader: glob({ pattern: "**/[^_]*.{md,mdx}", base: "./src/content/blog" }),
-	schema: z.object({
-		titulo: z.string().min(10).max(90),
-		descripcion: z.string().min(70).max(160),
-		area: z.enum(AREA_IDS),
-		subtema: z.string().optional(),
-		locale: localeField,
-		autor: z.string().default("Lisbeth Gutiérrez"),
-		publicado: z.coerce.date(),
-		actualizado: z.coerce.date().optional(),
-		etiquetas: z.array(z.string()).max(8).default([]),
-		portada: z.string().optional(),
-		portadaAlt: z.string().optional(),
-		destacado: z.boolean().default(false),
-		borrador: z.boolean().default(false),
-		seo,
-	}),
+	schema: z
+		.object({
+			titulo: z.string().min(10).max(90),
+			descripcion: z.string().min(70).max(160),
+			area: z.enum(AREA_IDS),
+			/*
+		  Validated against ITS OWN AREA below, not against a flat list.
+
+		  The panel offers the subtopics of all seven areas in one select, so
+		  nothing stopped "Divorcio" from being filed under a tax article —
+		  and a subtopic in the wrong area is worse than no subtopic: it's a
+		  label the reader trusts, pointing the wrong way.
+		*/
+			subtema: z.string().optional(),
+			locale: localeField,
+			autor: z.string().default("Lisbeth Gutiérrez"),
+			publicado: z.coerce.date(),
+			actualizado: z.coerce.date().optional(),
+			etiquetas: z.array(z.string()).max(8).default([]),
+			portada: z.string().optional(),
+			portadaAlt: z.string().optional(),
+			destacado: z.boolean().default(false),
+			borrador: z.boolean().default(false),
+			seo,
+		})
+		.superRefine((d, ctx) => {
+			if (!d.subtema) return;
+			const permitidos: readonly string[] = SUBTEMAS[d.area];
+			if (permitidos.includes(d.subtema)) return;
+
+			ctx.addIssue({
+				code: "custom",
+				path: ["subtema"],
+				message:
+					`"${d.subtema}" no es un subtema de ${d.area}. ` +
+					`Los de esa area son: ${permitidos.join(", ")}.`,
+			});
+		}),
 });
 
 /* ---------------------------------------------------------------- */

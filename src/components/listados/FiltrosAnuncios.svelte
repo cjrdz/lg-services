@@ -5,11 +5,11 @@
 	import { Search, X, SlidersHorizontal } from "lucide";
 	import TarjetaAnuncio from "@/components/anuncios/TarjetaAnuncio.svelte";
 	import {
-		cargarGsap,
+		cargarFlip,
 		capturarFlipState,
 		DURACION_NORMAL,
 		prefiereMovimientoReducido,
-		type GsapModulo,
+		type ModuloFlip,
 	} from "@/lib/gsap";
 	import type {
 		DescriptorFiltro,
@@ -71,7 +71,7 @@
 	let orden = $state(ordenPorDefecto);
 	let montado = $state(false);
 	let grid: HTMLElement | undefined = $state();
-	let gsapMod = $state<GsapModulo | null>(null);
+	let gsapMod = $state<ModuloFlip | null>(null);
 
 	/*
 	  Panel open/closed, only meaningful below the listing breakpoint (the CSS
@@ -81,8 +81,14 @@
 	*/
 	let panelAbierto = $state(true);
 
-	// Start loading GSAP as soon as this module runs on the client.
-	const gsapPromise = typeof window !== "undefined" ? cargarGsap() : null;
+	/*
+	  Start loading GSAP as soon as this module runs on the client.
+
+	  `cargarFlip()`, not a blanket loader: this island uses Flip and nothing
+	  else. The old entry point pulled ScrollTrigger along with it — 17 KB
+	  gzipped of a plugin no listing page ever calls.
+	*/
+	const gsapPromise = typeof window !== "undefined" ? cargarFlip() : null;
 
 	/* On mount, read the URL: a filter shared over WhatsApp — how listings
 	   actually circulate here — opens to exactly what the sender saw. */

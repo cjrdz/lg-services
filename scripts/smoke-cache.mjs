@@ -71,10 +71,61 @@ async function visita(etiqueta) {
 
 const { execSync: exec2 } = await import("node:child_process");
 
+/**
+ * Comprobación directa de cabeceras, sin navegador.
+ *
+ * Los pasos de abajo prueban el SÍNTOMA (las islas no hidratan); esto prueba
+ * la CAUSA, que es más barato y más específico: cualquier módulo que Vite
+ * sirva con los `?v=` del optimizador adentro tiene que ser incacheable.
+ *
+ * Existe porque hubo una segunda puerta abierta durante meses. El plugin solo
+ * miraba `/node_modules/.vite/deps/`, y el punto de entrada del renderer de
+ * Svelte —`/node_modules/@astrojs/svelte/dist/client.svelte.js`, que carga
+ * CADA isla— salía con `max-age=31536000,immutable` y un ETag, llevando
+ * adentro `deps/svelte_internal_client.js?v=<hash>`. El navegador se lo
+ * guardaba un año; en cuanto Vite re-optimizaba, ese hash dejaba de existir:
+ *
+ *     GET .../svelte_internal_client.js?v=<viejo>
+ *     net::ERR_ABORTED 504 (Outdated Optimize Dep)
+ *
+ * La `renderer-url` se lee del HTML en vez de escribirla acá: lleva un `?v=`
+ * que cambia, y una URL a mano se quedaría vieja sin que nadie se entere.
+ */
+async function revisarCabeceras() {
+	const html = await (await fetch(URL_)).text();
+	const urls = [
+		...new Set(
+			[...html.matchAll(/(?:renderer|component)-url="([^"]+)"/g)].map((m) => m[1]),
+		),
+		"/node_modules/.vite/deps/svelte.js",
+	];
+
+	let malas = 0;
+	for (const u of urls) {
+		const res = await fetch(new URL(u, URL_));
+		const cc = res.headers.get("cache-control") ?? "";
+		const etag = res.headers.get("etag");
+		const bien = cc.includes("no-store") && !etag;
+		if (!bien) {
+			malas++;
+			console.log(
+				`      · ${u}\n        cache-control: ${cc || "(ninguno)"}${etag ? ` · etag: ${etag}` : ""}`,
+			);
+		}
+	}
+
+	console.log(
+		`${malas === 0 ? "✓" : "✗"} ${"0. cabeceras incacheables".padEnd(32)} módulos revisados=${urls.length} cacheables=${malas}`,
+	);
+	return malas === 0;
+}
+
 let fallos = 0;
 const paso = async (etiqueta) => {
 	if (!(await visita(etiqueta))) fallos++;
 };
+
+if (!(await revisarCabeceras())) fallos++;
 
 await paso("1. caché fría");
 await paso("2. caché caliente");
